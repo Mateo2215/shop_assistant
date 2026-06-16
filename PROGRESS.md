@@ -23,6 +23,7 @@
 - **Ikony** — 192×192, 512×512 (maskable), 180×180 apple-touch-icon; gradient indigo→violet, "Z" jako path
 - **Animacje** — checkbox pop (keyframe scale), slide-in nowych elementów listy
 - **Deploy** — Firebase Hosting, `npm run deploy`, SPA rewrite, cache headers
+- **Gazetka Kaufland** — zakładka z linkiem wychodzącym do gazetki (iframe blokowany przez X-Frame-Options, więc otwieranie w nowej karcie)
 
 ## Komendy
 ```bash

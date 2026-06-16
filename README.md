@@ -41,6 +41,10 @@ Wspólna lista zakupów dla dwojga. Działa na telefonie jak normalna aplikacja 
 ### Tryb ciemny
 - Przełącznik w prawym górnym rogu — aplikacja zapamiętuje Twój wybór
 
+### Gazetka Kaufland
+- Osobna zakładka z linkiem do aktualnej gazetki promocyjnej Kaufland
+- Otwiera się w nowej karcie przeglądarki (jednym kliknięciem)
+
 ---
 
 ## Jak zainstalować na telefonie

@@ -4,6 +4,8 @@
 
 **Zakupowo** — wspólna lista zakupów dla pary. PWA (Progressive Web App), mobile-first, po polsku, z real-time synchronizacją.
 
+> **Status: dostarczony i w użyciu.** Aplikacja jest live na https://zakupowo-28267.web.app i używana na co dzień. Ten dokument opisuje **stan rzeczywisty** wdrożonej aplikacji (nie plan budowy). Aktualizacje: `npm run deploy`.
+
 ### Użytkownicy
 
 Dwoje ludzi (para). Mix iPhone + Android. Appka działa w przeglądarce — zero instalacji ze sklepu. Nie projektujemy pod wielu użytkowników — to prywatna appka dla 2 osób.
@@ -16,55 +18,63 @@ Dwoje ludzi (para). Mix iPhone + Android. Appka działa w przeglądarce — zero
 - **PWA:** Service Worker + Web App Manifest (instalowalna na ekranie głównym)
 - **Linting:** ESLint + Prettier
 
-### Struktura katalogów (docelowa)
+### Struktura katalogów (stan rzeczywisty)
 
 ```
-zakupowo/
+Zakupowo/
 ├── CLAUDE.md
 ├── PROGRESS.md
+├── README.md
 ├── package.json
-├── vite.config.ts
-├── tailwind.config.ts
+├── vite.config.ts            # Vite + vite-plugin-pwa (manifest + SW)
+├── tailwind.config.ts        # darkMode: 'class'
 ├── tsconfig.json
-├── index.html
+├── postcss.config.js
+├── firebase.json             # Hosting + SPA rewrite + cache headers
+├── .firebaserc               # project ID
+├── index.html                # zawiera anti-FOUC inline script (dark mode)
+├── scripts/
+│   └── generate-icons.mjs    # PNG z public/icon.svg przez sharp
 ├── public/
-│   ├── manifest.json
-│   ├── sw.js
-│   ├── icons/          # Ikony PWA (192x192, 512x512)
-│   └── favicon.ico
+│   ├── icon.svg              # źródłowa ikona (gradient indigo→violet, "Z" jako path)
+│   ├── icons/                # icon-192.png, icon-512.png (maskable), apple-touch-icon.png
+│   └── manifest.json
 ├── src/
 │   ├── main.tsx
-│   ├── App.tsx
-│   ├── firebase.ts     # Konfiguracja Firebase
+│   ├── App.tsx               # routing zakładek (list/templates/historia/statystyki/gazetka)
+│   ├── firebase.ts           # Firebase v10 + persistentLocalCache (offline-first)
+│   ├── index.css             # Tailwind + keyframes (checkbox pop, slide-in)
 │   ├── components/
-│   │   ├── ShoppingList.tsx
+│   │   ├── Header.tsx                # tytuł + przełącznik dark mode
+│   │   ├── AddProduct.tsx            # pole szybkiego dodawania + autouzupełnianie
 │   │   ├── ProductItem.tsx
-│   │   ├── AddProduct.tsx
-│   │   ├── CategoryGroup.tsx
-│   │   ├── Suggestions.tsx       # "Może potrzebujesz?"
-│   │   ├── Templates.tsx         # Szablony przepisów
-│   │   ├── TemplateEditor.tsx    # Tworzenie/edycja szablonów
-│   │   ├── History.tsx           # Historia zakupów
-│   │   ├── KauflandFlyer.tsx     # Gazetka Kaufland
-│   │   └── ui/                   # Reusable UI components
+│   │   ├── ShoppingList.tsx          # grupowanie po kategoriach + sekcja "Kupione"
+│   │   ├── Suggestions.tsx           # "Może potrzebujesz?"
+│   │   ├── Templates.tsx             # szablony przepisów
+│   │   ├── TemplateEditor.tsx        # tworzenie/edycja szablonów
+│   │   ├── History.tsx               # historia zakupów
+│   │   ├── Statistics.tsx            # statystyki (Recharts)
+│   │   └── BottomNav.tsx             # dolna nawigacja (5 zakładek)
 │   ├── hooks/
-│   │   ├── useShoppingList.ts
-│   │   ├── useProducts.ts
+│   │   ├── useShoppingList.ts        # CRUD + real-time onSnapshot
+│   │   ├── useProducts.ts            # baza znanych produktów + purchaseCount
 │   │   ├── useSuggestions.ts
-│   │   └── useTemplates.ts
+│   │   ├── useTemplates.ts           # CRUD + soft-delete defaultów + useCount
+│   │   ├── useHistory.ts             # zapis/odczyt zamkniętych list
+│   │   ├── useStatistics.ts          # agregacje pod wykresy
+│   │   └── useTheme.ts               # dark mode (localStorage)
 │   ├── types/
-│   │   └── index.ts
-│   ├── data/
-│   │   ├── categories.ts         # Kategorie + ikony + kolory
-│   │   ├── defaultProducts.ts    # Baza popularnych produktów PL
-│   │   └── defaultTemplates.ts   # Gotowe szablony przepisów
-│   ├── utils/
-│   │   └── suggestions.ts        # Logika sugestii na podstawie historii
-│   └── styles/
-│       └── globals.css
+│   │   └── index.ts                  # Product, Template, ActiveTab, ...
+│   └── data/
+│       ├── categories.ts             # 21 kategorii + ikony + kolory (źródło prawdy)
+│       ├── defaultProducts.ts        # baza popularnych produktów PL
+│       └── defaultTemplates.ts       # 46 gotowych szablonów przepisów
 └── tasks/
-    └── lessons.md
+    ├── todo.md                       # plan i postęp
+    └── lessons.md                    # wnioski z budowy
 ```
+
+> Uwaga: zakładka **Gazetka** to nie osobny komponent — jest renderowana inline w `App.tsx` jako link wychodzący (zob. funkcja #6 niżej). Nie ma katalogów `utils/` ani `styles/` — logika sugestii żyje w hookach, style w `index.css` + Tailwind.
 
 ---
 
@@ -123,12 +133,23 @@ zakupowo/
 - Możliwość "powtórzenia" starych zakupów (przywróć całą listę)
 - Historia służy też jako źródło danych dla sugestii (pkt 2)
 
-### 6. Gazetka Kaufland
+### 6. Gazetka Kaufland ✅ (zrealizowane jako link)
 
-- Sekcja/tab z embed lub linkiem do aktualnej gazetki Kaufland Polska
-- URL do gazetki: `https://www.kaufland.pl/oferty/oferta-tygodnia.html` (lub aktualny)
-- Otwierane w iframe lub jako zewnętrzny link (zdecyduj co działa lepiej — iframe może być blokowany przez CORS/X-Frame-Options, wtedy link)
-- Opcjonalnie: przycisk "Sprawdź promocje" w widocznym miejscu
+- Osobna zakładka **Gazetka** 🗞️ w dolnej nawigacji
+- Zrealizowana jako **link wychodzący** (nie iframe) — iframe Kauflandu jest blokowany przez X-Frame-Options, więc otwieramy w nowej karcie
+- URL w kodzie: `https://www.kaufland.pl/oferta/gazetka.html` (zob. [`src/App.tsx`](src/App.tsx))
+- Przycisk „Otwórz gazetkę →"
+
+### 7. Statystyki ✅ (dodane poza pierwotnym scope)
+
+- Zakładka **Statystyki** 📊 z wykresami (Recharts)
+- KPI, BarChart (najczęstsze produkty), PieChart (ulubione kategorie), ranking szablonów
+- Reset statystyk (zeruje `purchaseCount`/`useCount`, nie kasuje dokumentów)
+
+### 8. Tryb ciemny ✅ (dodane poza pierwotnym scope)
+
+- Przełącznik w nagłówku, class-based (`darkMode: 'class'`), preferencja w `localStorage`
+- Anti-FOUC: inline `<script>` w `index.html` ustawia klasę `.dark` przed renderem Reacta
 
 ---
 
@@ -145,18 +166,7 @@ zakupowo/
 
 ### Kategorie — ikony i kolory
 
-| Kategoria | Emoji | Kolor akcentowy |
-|-----------|-------|-----------------|
-| Nabiał | 🥛 | #60A5FA (jasny niebieski) |
-| Warzywa i owoce | 🥕 | #34D399 (zielony) |
-| Pieczywo | 🍞 | #FBBF24 (złoty) |
-| Mięso i ryby | 🥩 | #F87171 (czerwony) |
-| Chemia/Dom | 🧹 | #A78BFA (fioletowy) |
-| Napoje | 🥤 | #38BDF8 (cyan) |
-| Mrożonki | 🧊 | #93C5FD (jasny blue) |
-| Przekąski | 🍪 | #FB923C (pomarańczowy) |
-| Przyprawy | 🌶️ | #F472B6 (różowy) |
-| Inne | 🛒 | #9CA3AF (szary) |
+Każda kategoria ma emoji i kolor akcentowy. **Źródło prawdy: [`src/data/categories.ts`](src/data/categories.ts)** — finalnie zdefiniowano **21 kategorii** (nie 10 z pierwotnego szkicu). Nie kopiuj listy tutaj — edytuj plik danych, aby uniknąć rozjazdu dokumentacji z kodem.
 
 ### Layout głównego ekranu
 
@@ -188,12 +198,15 @@ zakupowo/
 └─────────────────────────────┘
 ```
 
-### Nawigacja (bottom tabs)
+### Nawigacja (bottom tabs) — 5 zakładek
 
-1. **Lista** — główny ekran z listą zakupów
-2. **Szablony** — przeglądanie i dodawanie szablonów przepisów
-3. **Gazetka** — aktualna gazetka Kaufland
-4. **Historia** — poprzednie zakupy
+1. **Lista** 🛒 — główny ekran z listą zakupów
+2. **Szablony** 📋 — przeglądanie i dodawanie szablonów przepisów
+3. **Historia** 🕘 — poprzednie zakupy
+4. **Statystyki** 📊 — wykresy zakupowe
+5. **Gazetka** 🗞️ — link do gazetki Kaufland
+
+> Klucze zakładek w kodzie: `'list' | 'templates' | 'historia' | 'statystyki' | 'gazetka'` ([`src/types/index.ts`](src/types/index.ts)).
 
 ---
 
@@ -201,8 +214,12 @@ zakupowo/
 
 ### Kolekcje
 
+> Wszystkie kolekcje są **zagnieżdżone pod `households/{HOUSEHOLD_ID}/`** (a nie na top-level), gdzie `HOUSEHOLD_ID = "nasze-zakupy"`. To realizacja „Opcji A" z reguł bezpieczeństwa — jeden współdzielony household.
+
 ```
-shoppingList/           # Aktywna lista zakupów
+households/{householdId}/
+
+  shoppingList/           # Aktywna lista zakupów
   {productId}/
     name: string
     quantity: number
@@ -268,7 +285,10 @@ Appka jest prywatna dla 2 osób — najprostsze podejście:
 
 ---
 
-## Plan implementacji (fazy)
+## Plan implementacji (fazy) — ✅ UKOŃCZONE
+
+> Wszystkie 3 fazy zamknięte, aplikacja **live i w użyciu**: https://zakupowo-28267.web.app
+> Szczegółowy stan końcowy: [`PROGRESS.md`](PROGRESS.md) i [`tasks/todo.md`](tasks/todo.md). Poniższy plan zachowany jako zapis pierwotnego zakresu.
 
 ### Faza 1 — Fundament
 1. Inicjalizacja projektu (Vite + React + TS + Tailwind)
@@ -316,6 +336,9 @@ Na koniec każdej sesji zaktualizuj `PROGRESS.md`:
 
 ## Kontekst zewnętrzny
 
-- Kaufland Polska gazetka: https://www.kaufland.pl/oferty/oferta-tygodnia.html
-- Firebase Console: (do uzupełnienia po stworzeniu projektu)
-- Deploy URL: (do uzupełnienia po pierwszym deploy)
+- **Deploy URL (live):** https://zakupowo-28267.web.app
+- **Firebase project ID:** `zakupowo-28267` (zob. `.firebaserc`); konsola: https://console.firebase.google.com/project/zakupowo-28267
+- **Household ID:** `nasze-zakupy` (zmienna `VITE_HOUSEHOLD_ID` w `.env`)
+- **Repo (git remote):** https://github.com/Mateo2215/Zakupowo
+- **Kaufland Polska gazetka:** https://www.kaufland.pl/oferta/gazetka.html
+- Sekrety (klucze Firebase) wyłącznie w `.env` — nie commitować.
