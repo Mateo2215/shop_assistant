@@ -55,6 +55,11 @@
 **Rozwiązanie:** SVG źródłowy w `public/icon.svg` + skrypt `scripts/generate-icons.mjs` + `sharp` jako devDep. Ikona jako path SVG (nie tekst) — brak zależności od fontów systemowych.
 **Następnym razem:** Zawsze używaj path zamiast `<text>` w SVG przeznaczonych do rasteryzacji — fonty mogą nie być dostępne w środowisku budowania.
 
+## PWA home-screen icon — SVG z designu to za mało
+**Problem:** Paczka logo w `design/logo` zawiera poprawne SVG, ale instalacja PWA na ekranie głównym wymaga kompatybilnych rastrów: iOS używa `apple-touch-icon`, a Android najlepiej działa z osobną ikoną `maskable`.
+**Rozwiązanie:** Skopiować źródłowe SVG do `public/icons/`, wygenerować PNG 180/192/512/512-maskable przez `scripts/generate-icons.mjs` i wskazać je w `vite-plugin-pwa` oraz `index.html`.
+**Następnym razem:** Przy zmianie logo PWA aktualizuj równolegle źródła SVG, rastry PNG, manifest Vite i tagi `<head>`; po deployu testuj przez ponowne dodanie PWA do ekranu głównego.
+
 ## Prywatny push a publiczna publikacja repo
 **Problem:** Brak sekretów w `.git` nie oznacza automatycznie, że repo można bezpiecznie upublicznić. Kod klienta ujawnia strukturę Firestore, a dokumentacja może ujawnić realny household ID i prywatny kontekst.
 **Rozwiązanie:** Rozdzielać dwa werdykty: push do prywatnego repo oraz ustawienie repo jako publiczne. Publiczna publikacja wymaga osobnego przeglądu reguł dostępu, dokumentacji, historii commitów, licencji i odtwarzalności setupu.

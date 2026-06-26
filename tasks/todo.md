@@ -3,7 +3,9 @@
 ## Current State
 - Faza 1 UKOŃCZONA
 - Faza 2 UKOŃCZONA
-- Faza 3 UKOŃCZONA — aplikacja live na https://zakupowo-28267.web.app
+- Faza 3 UKOŃCZONA
+- Faza 4, migracja Firebase i redesign „Świeży Targ” wdrożone na https://zakupowo-v2.web.app
+- Ikony PWA/home-screen zostały przełączone na logo „Markiza targowa” z `design/logo`
 
 ---
 
@@ -44,8 +46,8 @@
 
 ## Faza 3 — Polish ✅
 - [x] vite-plugin-pwa (Service Worker auto-generowany przez Workbox)
-- [x] Web App Manifest (manifest.webmanifest — ikony, theme_color, display: standalone)
-- [x] Ikony PWA (192×192, 512×512 maskable, 180×180 apple-touch-icon — gradient indigo→violet)
+- [x] Web App Manifest (manifest.webmanifest — ikony, theme_color, display: standalone, `lang: pl`)
+- [x] Ikony PWA (192×192, 512×512, 512×512 maskable, 180×180 apple-touch-icon — logo „Markiza targowa”)
 - [x] Animacje (checkbox pop scale 1→1.35→0.9→1, slide-in nowych elementów)
 - [x] Firebase Hosting (firebase.json, .firebaserc, npm run deploy)
 - [x] Deploy — aplikacja live: https://zakupowo-28267.web.app
@@ -86,3 +88,5 @@ Szczegóły: `docs/plans/firebase-project-migration.md`.
 - [x] Przestylować główną listę zakupów i widoki `Kategorie` / `Dni`
 - [x] Przestylować szablony, historię, statystyki, gazetkę i modal dni
 - [x] Zweryfikować build oraz podstawowe scenariusze mobile dark/light
+- [x] Podłączyć logo z `design/logo` jako favicon, manifest icons, maskable icon i `apple-touch-icon`
+- [ ] P1: Po deployu dodać PWA ponownie na telefonie i potwierdzić, że ekran główny pokazuje nowe logo
