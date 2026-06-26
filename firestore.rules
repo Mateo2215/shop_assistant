@@ -1,10 +1,11 @@
-// Restricts the unauthenticated private app to its single known household path.
+// Restricts the private app to its single household path, and only for clients
+// that hold an (anonymous) auth token — knowing the household ID is not enough.
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
     match /households/nasze-zakupy/{document=**} {
-      allow read, write: if true;
+      allow read, write: if request.auth != null;
     }
   }
 }
