@@ -65,7 +65,7 @@
 - [x] Zintegrować historię i „Usuń kupione”
 - [x] Zweryfikować build i izolowany mobilny UI
 - [ ] P1: Sprawdzić zapis i synchronizację Firestore na 2 urządzeniach
-- [ ] P1: Wykonać osobny deploy po teście ręcznym
+- [x] P1: Wykonać osobny deploy po teście ręcznym — Faza 4 live na zakupowo-v2 (deploy 28242807430), 2026-06-26
 
 Szczegóły: `docs/plans/weekly-meal-planning.md`.
 
@@ -89,4 +89,4 @@ Szczegóły: `docs/plans/firebase-project-migration.md`.
 - [x] Przestylować szablony, historię, statystyki, gazetkę i modal dni
 - [x] Zweryfikować build oraz podstawowe scenariusze mobile dark/light
 - [x] Podłączyć logo z `design/logo` jako favicon, manifest icons, maskable icon i `apple-touch-icon`
-- [ ] P1: Po deployu dodać PWA ponownie na telefonie i potwierdzić, że ekran główny pokazuje nowe logo
+- [ ] P1: Po deployu dodać PWA ponownie na telefonie i potwierdzić, że ekran główny pokazuje nowe logo (warunek: deploy logo wykonany 2026-06-26)
