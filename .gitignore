@@ -43,3 +43,10 @@ firebase-debug.log*
 
 # Firebase deploy cache
 .firebase/
+
+# Internal working files — kept locally, excluded from the public repo
+CLAUDE.md
+PROGRESS.md
+tasks/
+docs/
+tools/

@@ -93,10 +93,31 @@ To automatycznie buduje nową wersję i wgrywa ją pod adres aplikacji. Użytkow
 
 ---
 
+## Uruchom własną kopię (dla deweloperów)
+
+Aplikacja jest niezależna od konkretnego konta — możesz postawić własną instancję na swoim Firebase.
+
+**Wymagania:** Node.js 18+, własne konto Google Firebase.
+
+1. **Sklonuj repo i zainstaluj zależności:**
+   ```
+   git clone https://github.com/Mateo2215/shop_assistant.git
+   cd shop_assistant
+   npm install
+   ```
+2. **Załóż projekt w Firebase** ([console.firebase.google.com](https://console.firebase.google.com)) i włącz **Firestore Database**.
+3. **Skonfiguruj zmienne środowiskowe:** skopiuj `.env.example` do `.env` i uzupełnij wartościami z konfiguracji web swojego projektu Firebase (Ustawienia projektu → Twoje aplikacje → SDK setup). `VITE_HOUSEHOLD_ID` ustaw na dowolny, trudny do odgadnięcia identyfikator — to wspólny „klucz" twojego gospodarstwa.
+4. **Wdróż reguły Firestore:** dostosuj `firestore.rules` do swojego household ID i opublikuj je w projekcie (`firebase deploy --only firestore:rules`).
+   > ⚠️ **Bezpieczeństwo:** aplikacja w obecnej postaci nie ma logowania — dostęp do danych chroni wyłącznie household ID + reguły Firestore. Zanim wystawisz to publicznie z realnymi danymi, rozważ dodanie Firebase Anonymous Auth i regułę `allow read, write: if request.auth != null`.
+5. **Uruchom lokalnie:** `npm run dev` (podgląd na `http://localhost:5173`).
+6. **Wdróż na Firebase Hosting:** ustaw swój projekt w `.firebaserc`, zaloguj się (`firebase login`) i wgraj: `npm run deploy`.
+
+---
+
 ## Struktura projektu (dla zainteresowanych)
 
 ```
-Zakupowo/
+shop_assistant/
 ├── src/
 │   ├── components/     — widoczne elementy aplikacji (lista, szablony, historia...)
 │   ├── hooks/          — logika biznesowa (synchronizacja, obliczenia)
@@ -107,10 +128,9 @@ Zakupowo/
 │   └── icons/          — ikony PWA w różnych rozmiarach
 ├── scripts/
 │   └── generate-icons.mjs  — skrypt generujący ikony PNG z pliku SVG
-├── tasks/
-│   ├── todo.md         — plan i postęp projektu
-│   └── lessons.md      — wnioski i lekcje z budowania
+├── firestore.rules     — reguły bezpieczeństwa bazy danych
 ├── firebase.json       — konfiguracja serwera (Firebase Hosting)
+├── .env.example        — wzór pliku konfiguracyjnego (skopiuj do .env)
 └── .env                — klucze dostępu do Firebase (nie jest w repozytorium)
 ```
 
