@@ -105,12 +105,12 @@ Aplikacja jest niezależna od konkretnego konta — możesz postawić własną i
    cd shop_assistant
    npm install
    ```
-2. **Załóż projekt w Firebase** ([console.firebase.google.com](https://console.firebase.google.com)) i włącz **Firestore Database**.
+2. **Załóż projekt w Firebase** ([console.firebase.google.com](https://console.firebase.google.com)): włącz **Firestore Database** oraz **Authentication → Sign-in method → Anonymous** (aplikacja loguje się anonimowo w tle, bez ekranu logowania).
 3. **Skonfiguruj zmienne środowiskowe:** skopiuj `.env.example` do `.env` i uzupełnij wartościami z konfiguracji web swojego projektu Firebase (Ustawienia projektu → Twoje aplikacje → SDK setup). `VITE_HOUSEHOLD_ID` ustaw na dowolny, trudny do odgadnięcia identyfikator — to wspólny „klucz" twojego gospodarstwa.
-4. **Wdróż reguły Firestore:** dostosuj `firestore.rules` do swojego household ID i opublikuj je w projekcie (`firebase deploy --only firestore:rules`).
-   > ⚠️ **Bezpieczeństwo:** aplikacja w obecnej postaci nie ma logowania — dostęp do danych chroni wyłącznie household ID + reguły Firestore. Zanim wystawisz to publicznie z realnymi danymi, rozważ dodanie Firebase Anonymous Auth i regułę `allow read, write: if request.auth != null`.
-5. **Uruchom lokalnie:** `npm run dev` (podgląd na `http://localhost:5173`).
-6. **Wdróż na Firebase Hosting:** ustaw swój projekt w `.firebaserc`, zaloguj się (`firebase login`) i wgraj: `npm run deploy`.
+4. **Uruchom lokalnie:** `npm run dev` (podgląd na `http://localhost:5173`).
+5. **Wdróż na Firebase Hosting:** ustaw swój projekt w `.firebaserc`, zaloguj się (`firebase login`) i wgraj: `npm run deploy`.
+6. **Zabezpiecz dane regułami Firestore:** otwórz aplikację na swoich urządzeniach (żeby założyły anonimowe sesje), a następnie w `firestore.rules` podmień `nasze-zakupy` na swój household ID oraz listę UID-ów na własne. UID-y swoich urządzeń znajdziesz w **Firebase Console → Authentication → Users**. Opublikuj reguły: `firebase deploy --only firestore:rules`.
+   > ⚠️ **Bezpieczeństwo:** bez tego kroku dane chroni tylko znajomość household ID. Allowlista UID-ów sprawia, że nawet ktoś, kto zna Twój adres, nie wejdzie na listę — jego anonimowa sesja ma inny UID. Anonimowy UID nie jest sekretem (nie da się go podrobić), więc może być jawnie w regułach.
 
 ---
 

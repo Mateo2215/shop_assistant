@@ -1,11 +1,17 @@
-// Restricts the private app to its single household path, and only for clients
-// that hold an (anonymous) auth token — knowing the household ID is not enough.
+// Locks the single household to its two known anonymous devices. Knowing the
+// household ID is not enough: the caller must hold an anonymous auth token
+// whose UID is allow-listed below.
+//
+// Self-hosting? Replace `nasze-zakupy` with your own VITE_HOUSEHOLD_ID and the
+// two UIDs below with your own devices' UIDs
+// (Firebase Console -> Authentication -> Users).
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
     match /households/nasze-zakupy/{document=**} {
-      allow read, write: if request.auth != null;
+      allow read, write: if request.auth != null
+        && request.auth.uid in ['OIPofbVoRzbnQreDceRjPMFT6hY2', 'whc51v9qKWga2bSOfDqIxRbjWN82'];
     }
   }
 }
