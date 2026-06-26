@@ -28,6 +28,13 @@ Wspólna lista zakupów dla dwojga. Działa na telefonie jak normalna aplikacja 
 - Klikasz "Użyj szablonu" → wszystkie składniki lądują na liście jednym kliknięciem
 - Możesz tworzyć własne szablony i edytować istniejące
 
+### Planowanie posiłków na dni tygodnia
+- Każdy produkt może mieć jeden lub kilka dni tygodnia
+- Listę można przełączać między widokiem kategorii sklepowych i widokiem dni
+- W szablonach akcja "📅 Zaplanuj" przypisuje całe danie do wybranych dni
+- Wspólne składniki pozostają jednym zakupem, nawet jeśli należą do kilku posiłków
+- Produkty bez oznaczenia trafiają do sekcji "Bez dnia"
+
 ### Historia
 - Każde zakupy są zapamiętywane automatycznie
 - Możesz powtórzyć poprzednią listę jednym kliknięciem

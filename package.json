@@ -9,6 +9,10 @@
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "generate-icons": "node scripts/generate-icons.mjs",
+    "firestore:inventory": "node tools/firestore-migration.mjs inventory",
+    "firestore:migrate": "node tools/firestore-migration.mjs migrate",
+    "firestore:verify": "node tools/firestore-migration.mjs verify",
+    "firestore:migration:test": "node tools/firestore-migration-self-test.mjs",
     "deploy": "npm run build && npx firebase-tools deploy --only hosting"
   },
   "dependencies": {
@@ -24,6 +28,7 @@
     "@typescript-eslint/parser": "^7.13.1",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.19",
+    "google-auth-library": "^10.9.0",
     "postcss": "^8.4.39",
     "sharp": "^0.34.5",
     "tailwindcss": "^3.4.6",

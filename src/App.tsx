@@ -1,11 +1,21 @@
-import { useState } from 'react'
-import type { ActiveTab, Template, HistoryEntry } from './types'
+import { useEffect, useState } from 'react'
+import type {
+  ActiveTab,
+  HistoryEntry,
+  MealPlan,
+  ShoppingItem,
+  ShoppingListView,
+  Template,
+  Weekday,
+} from './types'
 import { useShoppingList } from './hooks/useShoppingList'
 import { useProducts } from './hooks/useProducts'
 import { useTemplates } from './hooks/useTemplates'
 import { useHistory } from './hooks/useHistory'
 import { useSuggestions } from './hooks/useSuggestions'
 import { useTheme } from './hooks/useTheme'
+import { useMealPlans } from './hooks/useMealPlans'
+import { getInheritedDays } from './data/weekdays'
 import Header from './components/Header'
 import AddProduct from './components/AddProduct'
 import ShoppingList from './components/ShoppingList'
@@ -14,20 +24,52 @@ import Templates from './components/Templates'
 import History from './components/History'
 import Statistics from './components/Statistics'
 import BottomNav from './components/BottomNav'
+import DayPickerModal from './components/DayPickerModal'
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('list')
+  const [listView, setListView] = useState<ShoppingListView>(() => {
+    const saved = localStorage.getItem('shopping-list-view')
+    return saved === 'days' ? 'days' : 'categories'
+  })
+  const [editingDaysItem, setEditingDaysItem] = useState<ShoppingItem | null>(null)
+  const [editingMealPlan, setEditingMealPlan] = useState<MealPlan | null>(null)
   const { isDark, toggleTheme } = useTheme()
 
-  const { items, loading, error, addItem, toggleItem, removeItem, clearChecked } =
-    useShoppingList()
+  const {
+    items,
+    loading,
+    error,
+    addItem,
+    toggleItem,
+    updateManualDays,
+    markStandalone,
+  } = useShoppingList()
   const { firestoreProducts, searchProducts, ensureProduct, recordPurchase, deleteProduct, dismissSuggestion, resetAllProducts } =
     useProducts()
   const { allTemplates, createTemplate, updateTemplate, deleteTemplate, recordTemplateUse, resetTemplateUseCounts } = useTemplates()
   const { history, saveToHistory, deleteEntry, clearHistory } = useHistory()
+  const {
+    mealPlans,
+    loading: mealPlansLoading,
+    error: mealPlansError,
+    planTemplate,
+    updateMealPlanDays,
+    removeMealPlan,
+    removeShoppingItem,
+    removeCheckedItems,
+  } = useMealPlans()
   const suggestions = useSuggestions(firestoreProducts, items)
 
   const checkedCount = items.filter((i) => i.checked).length
+
+  useEffect(() => {
+    localStorage.setItem('shopping-list-view', listView)
+  }, [listView])
+
+  useEffect(() => {
+    if (mealPlansError && listView === 'days') setListView('categories')
+  }, [mealPlansError, listView])
 
   // Add to list + save to products DB so it persists in autocomplete
   async function handleAddItem(
@@ -36,7 +78,15 @@ export default function App() {
     quantity?: string,
     unit?: string
   ) {
-    await addItem(name, category, quantity, unit)
+    const existing = items.find(
+      (item) => !item.checked && item.name.toLocaleLowerCase('pl') === name.toLocaleLowerCase('pl')
+    )
+
+    if (existing) {
+      await markStandalone(existing.id)
+    } else {
+      await addItem(name, category, quantity, unit)
+    }
     ensureProduct(name, category).catch(console.error)
   }
 
@@ -53,21 +103,57 @@ export default function App() {
   async function handleClearChecked() {
     const checkedItems = items.filter((i) => i.checked)
     await saveToHistory(checkedItems)
-    await clearChecked()
+    await removeCheckedItems(checkedItems)
   }
 
-  // Add all template items to list, skip duplicates, record template usage
+  // Add all template items as standalone shopping-list entries.
   async function handleAddFromTemplate(template: Template) {
-    const existingNames = new Set(
-      items.filter((i) => !i.checked).map((i) => i.name.toLowerCase())
-    )
     for (const item of template.items) {
-      if (!existingNames.has(item.name.toLowerCase())) {
-        await handleAddItem(item.name, item.category, item.quantity, item.unit)
-      }
+      await handleAddItem(item.name, item.category, item.quantity, item.unit)
     }
     recordTemplateUse(template.id).catch(console.error)
     setActiveTab('list')
+  }
+
+  async function handlePlanTemplate(template: Template, days: Weekday[]) {
+    await planTemplate(template, days, items)
+    Promise.all(
+      template.items.map((item) => ensureProduct(item.name, item.category))
+    ).catch(console.error)
+    recordTemplateUse(template.id).catch(console.error)
+    setActiveTab('list')
+    setListView('days')
+  }
+
+  async function handleRemoveItem(item: ShoppingItem) {
+    if (item.mealPlanIds.length > 0) {
+      const planNames = mealPlans
+        .filter((plan) => item.mealPlanIds.includes(plan.id))
+        .map((plan) => plan.name)
+        .join(', ')
+      const confirmed = confirm(
+        `Produkt „${item.name}” należy do planu: ${planNames || 'posiłek'}. Usunąć go również z planu?`
+      )
+      if (!confirmed) return
+    }
+
+    await removeShoppingItem(item)
+  }
+
+  async function handleSaveManualDays(item: ShoppingItem, days: Weekday[]) {
+    await updateManualDays(item.id, days)
+    setEditingDaysItem(null)
+  }
+
+  async function handleSaveMealPlanDays(plan: MealPlan, days: Weekday[]) {
+    await updateMealPlanDays(plan, days)
+    setEditingMealPlan(null)
+  }
+
+  async function handleRemoveMealPlan(plan: MealPlan) {
+    if (!confirm(`Usunąć plan „${plan.name}” i niepotrzebne już składniki?`)) return
+    await removeMealPlan(plan, items)
+    setEditingMealPlan(null)
   }
 
   async function handleResetStatistics() {
@@ -106,10 +192,17 @@ export default function App() {
           <Suggestions suggestions={suggestions} onAdd={handleAddItem} onDismiss={dismissSuggestion} />
           <ShoppingList
             items={items}
+            mealPlans={mealPlans}
             loading={loading}
             error={error}
+            mealPlansLoading={mealPlansLoading}
+            mealPlansError={mealPlansError}
+            view={listView}
+            onViewChange={setListView}
             onToggle={handleToggle}
-            onRemove={removeItem}
+            onRemove={handleRemoveItem}
+            onEditDays={setEditingDaysItem}
+            onEditMealPlan={setEditingMealPlan}
           />
         </>
       )}
@@ -117,7 +210,9 @@ export default function App() {
       {activeTab === 'templates' && (
         <Templates
           templates={allTemplates}
+          mealPlans={mealPlans}
           onAddFromTemplate={handleAddFromTemplate}
+          onPlanTemplate={handlePlanTemplate}
           onCreateTemplate={createTemplate}
           onUpdateTemplate={updateTemplate}
           onDeleteTemplate={deleteTemplate}
@@ -160,6 +255,37 @@ export default function App() {
       )}
 
       <BottomNav active={activeTab} onChange={setActiveTab} />
+
+      {editingDaysItem && (
+        <DayPickerModal
+          key={editingDaysItem.id}
+          title={`Dni: ${editingDaysItem.name}`}
+          description={
+            editingDaysItem.mealPlanIds.length > 0
+              ? 'Dni z planów posiłków są zablokowane. Pozostałe możesz ustawić ręcznie.'
+              : 'Wybierz dowolne dni lub zostaw produkt bez dnia.'
+          }
+          selectedDays={editingDaysItem.manualDays}
+          lockedDays={getInheritedDays(editingDaysItem, mealPlans)}
+          onSave={(days) => handleSaveManualDays(editingDaysItem, days)}
+          onClose={() => setEditingDaysItem(null)}
+        />
+      )}
+
+      {editingMealPlan && (
+        <DayPickerModal
+          key={editingMealPlan.id}
+          title={`${editingMealPlan.emoji} ${editingMealPlan.name}`}
+          description="Zmiana dotyczy całego posiłku i wszystkich jego składników."
+          selectedDays={editingMealPlan.days}
+          allowEmpty={false}
+          saveLabel="Zapisz plan"
+          deleteLabel="Usuń plan"
+          onSave={(days) => handleSaveMealPlanDays(editingMealPlan, days)}
+          onDelete={() => handleRemoveMealPlan(editingMealPlan)}
+          onClose={() => setEditingMealPlan(null)}
+        />
+      )}
     </div>
   )
 }

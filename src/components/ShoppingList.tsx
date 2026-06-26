@@ -1,16 +1,39 @@
-import type { ShoppingItem, CategoryId } from '../types'
-import { CATEGORIES, getCategory } from '../data/categories'
+import type { MealPlan, ShoppingItem, ShoppingListView } from '../types'
+import { getEffectiveDays } from '../data/weekdays'
+import CategoryListView from './CategoryListView'
+import DayListView from './DayListView'
+import ListViewToggle from './ListViewToggle'
 import ProductItem from './ProductItem'
 
 interface ShoppingListProps {
   items: ShoppingItem[]
+  mealPlans: MealPlan[]
   loading: boolean
   error: string | null
+  mealPlansLoading: boolean
+  mealPlansError: string | null
+  view: ShoppingListView
+  onViewChange: (view: ShoppingListView) => void
   onToggle: (id: string, checked: boolean) => void
-  onRemove: (id: string) => void
+  onRemove: (item: ShoppingItem) => void
+  onEditDays: (item: ShoppingItem) => void
+  onEditMealPlan: (plan: MealPlan) => void
 }
 
-export default function ShoppingList({ items, loading, error, onToggle, onRemove }: ShoppingListProps) {
+export default function ShoppingList({
+  items,
+  mealPlans,
+  loading,
+  error,
+  mealPlansLoading,
+  mealPlansError,
+  view,
+  onViewChange,
+  onToggle,
+  onRemove,
+  onEditDays,
+  onEditMealPlan,
+}: ShoppingListProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20 text-slate-500">
@@ -37,54 +60,50 @@ export default function ShoppingList({ items, loading, error, onToggle, onRemove
   const unchecked = items.filter((i) => !i.checked)
   const checked = items.filter((i) => i.checked)
 
-  if (unchecked.length === 0 && checked.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-slate-500">
-        <div className="text-5xl mb-3">🛒</div>
-        <p className="text-lg font-medium text-slate-500 dark:text-slate-400">Lista jest pusta</p>
-        <p className="text-sm mt-1">Dodaj pierwszy produkt powyżej</p>
-      </div>
-    )
-  }
-
-  // Group unchecked items by category, maintaining CATEGORIES order
-  const grouped = CATEGORIES.reduce<Partial<Record<CategoryId, ShoppingItem[]>>>((acc, cat) => {
-    const catItems = unchecked.filter((i) => i.category === cat.id)
-    if (catItems.length > 0) acc[cat.id] = catItems
-    return acc
-  }, {})
-
-  // Items with unknown/legacy categories not caught above
-  const knownIds = new Set(CATEGORIES.map((c) => c.id))
-  const ungrouped = unchecked.filter((i) => !knownIds.has(i.category))
-  if (ungrouped.length > 0) {
-    grouped['other' as CategoryId] = [...(grouped['other'] ?? []), ...ungrouped]
-  }
-
   return (
     <div className="pb-28">
-      {(Object.entries(grouped) as [CategoryId, ShoppingItem[]][]).map(([catId, catItems]) => {
-        const cat = getCategory(catId)
-        return (
-          <div key={catId} className="mb-1">
-            <div className={`px-4 py-1.5 flex items-center gap-2 ${cat.bgColor}`}>
-              <span className="text-base">{cat.emoji}</span>
-              <span className={`text-sm font-semibold ${cat.textColor}`}>{cat.name}</span>
-              <span className="ml-auto text-xs text-slate-400 dark:text-slate-500">{catItems.length}</span>
-            </div>
-            <div className="bg-white dark:bg-slate-900">
-              {catItems.map((item) => (
-                <ProductItem
-                  key={item.id}
-                  item={item}
-                  onToggle={onToggle}
-                  onRemove={onRemove}
-                />
-              ))}
-            </div>
-          </div>
-        )
-      })}
+      <ListViewToggle
+        value={view}
+        onChange={onViewChange}
+        daysDisabled={Boolean(mealPlansError)}
+      />
+
+      {mealPlansError && (
+        <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
+          {mealPlansError} Widok kategorii nadal działa.
+        </div>
+      )}
+
+      {view === 'days' && mealPlansLoading && (
+        <div className="px-4 py-4 text-center text-sm text-slate-500">
+          Ładowanie planów posiłków...
+        </div>
+      )}
+
+      {unchecked.length === 0 && checked.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 text-slate-500">
+          <div className="mb-3 text-5xl">🛒</div>
+          <p className="text-lg font-medium text-slate-500 dark:text-slate-400">Lista jest pusta</p>
+          <p className="mt-1 text-sm">Dodaj pierwszy produkt powyżej</p>
+        </div>
+      ) : view === 'categories' ? (
+        <CategoryListView
+          items={unchecked}
+          mealPlans={mealPlans}
+          onToggle={onToggle}
+          onRemove={onRemove}
+          onEditDays={onEditDays}
+        />
+      ) : !mealPlansLoading && !mealPlansError ? (
+        <DayListView
+          items={unchecked}
+          mealPlans={mealPlans}
+          onToggle={onToggle}
+          onRemove={onRemove}
+          onEditDays={onEditDays}
+          onEditMealPlan={onEditMealPlan}
+        />
+      ) : null}
 
       {checked.length > 0 && (
         <div className="mt-3">
@@ -98,8 +117,10 @@ export default function ShoppingList({ items, loading, error, onToggle, onRemove
               <ProductItem
                 key={item.id}
                 item={item}
+                days={getEffectiveDays(item, mealPlans)}
                 onToggle={onToggle}
                 onRemove={onRemove}
+                onEditDays={onEditDays}
               />
             ))}
           </div>

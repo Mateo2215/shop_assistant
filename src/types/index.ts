@@ -36,6 +36,9 @@ export interface ShoppingItem {
   unit?: string
   category: CategoryId
   checked: boolean
+  manualDays: Weekday[]
+  mealPlanIds: string[]
+  isStandalone: boolean
   createdAt: Date
   updatedAt: Date
 }
@@ -64,6 +67,30 @@ export interface Template {
   useCount?: number
 }
 
+export type Weekday =
+  | 'monday'
+  | 'tuesday'
+  | 'wednesday'
+  | 'thursday'
+  | 'friday'
+  | 'saturday'
+  | 'sunday'
+
+export interface MealPlanItem extends TemplateItem {
+  shoppingItemId: string
+}
+
+export interface MealPlan {
+  id: string
+  templateId: string
+  name: string
+  emoji: string
+  days: Weekday[]
+  items: MealPlanItem[]
+  createdAt: Date
+  updatedAt: Date
+}
+
 export interface HistoryItem {
   name: string
   quantity?: string
@@ -78,3 +105,4 @@ export interface HistoryEntry {
 }
 
 export type ActiveTab = 'list' | 'templates' | 'historia' | 'statystyki' | 'gazetka'
+export type ShoppingListView = 'categories' | 'days'

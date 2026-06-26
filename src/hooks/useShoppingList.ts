@@ -3,7 +3,6 @@ import {
   collection,
   addDoc,
   updateDoc,
-  deleteDoc,
   doc,
   onSnapshot,
   orderBy,
@@ -12,7 +11,8 @@ import {
   Timestamp,
 } from 'firebase/firestore'
 import { db, HOUSEHOLD_ID } from '../firebase'
-import type { ShoppingItem, CategoryId } from '../types'
+import { parseWeekdays } from '../data/weekdays'
+import type { ShoppingItem, CategoryId, Weekday } from '../types'
 
 function docToItem(id: string, data: Record<string, unknown>): ShoppingItem {
   return {
@@ -22,6 +22,11 @@ function docToItem(id: string, data: Record<string, unknown>): ShoppingItem {
     unit: (data.unit as string) || undefined,
     category: data.category as CategoryId,
     checked: data.checked as boolean,
+    manualDays: parseWeekdays(data.manualDays),
+    mealPlanIds: Array.isArray(data.mealPlanIds)
+      ? data.mealPlanIds.filter((value): value is string => typeof value === 'string')
+      : [],
+    isStandalone: typeof data.isStandalone === 'boolean' ? data.isStandalone : true,
     createdAt: (data.createdAt as Timestamp)?.toDate() ?? new Date(),
     updatedAt: (data.updatedAt as Timestamp)?.toDate() ?? new Date(),
   }
@@ -64,6 +69,9 @@ export function useShoppingList() {
       quantity: quantity ?? null,
       unit: unit ?? null,
       checked: false,
+      manualDays: [],
+      mealPlanIds: [],
+      isStandalone: true,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     })
@@ -74,15 +82,23 @@ export function useShoppingList() {
     await updateDoc(itemRef, { checked, updatedAt: serverTimestamp() })
   }
 
-  async function removeItem(id: string) {
+  async function updateManualDays(id: string, manualDays: Weekday[]) {
     const itemRef = doc(db, 'households', HOUSEHOLD_ID, 'shoppingList', id)
-    await deleteDoc(itemRef)
+    await updateDoc(itemRef, { manualDays, updatedAt: serverTimestamp() })
   }
 
-  async function clearChecked() {
-    const checked = items.filter((i) => i.checked)
-    await Promise.all(checked.map((i) => removeItem(i.id)))
+  async function markStandalone(id: string) {
+    const itemRef = doc(db, 'households', HOUSEHOLD_ID, 'shoppingList', id)
+    await updateDoc(itemRef, { isStandalone: true, updatedAt: serverTimestamp() })
   }
 
-  return { items, loading, error, addItem, toggleItem, removeItem, clearChecked }
+  return {
+    items,
+    loading,
+    error,
+    addItem,
+    toggleItem,
+    updateManualDays,
+    markStandalone,
+  }
 }

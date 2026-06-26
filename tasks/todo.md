@@ -52,5 +52,30 @@
 
 ---
 
-## Projekt zakończony ✅
-Brak aktywnych zadań.
+## Stan po Fazie 3 ✅
+
+## Faza 4 — Tygodniowe planowanie posiłków 🚧
+- [x] Dodać model dni tygodnia i planów posiłków
+- [x] Dodać atomowe operacje planowania i sprzątania
+- [x] Dodać panel wyboru dni przy produkcie
+- [x] Dodać akcję „Zaplanuj” w szablonach
+- [x] Dodać widoki „Kategorie” i „Dni”
+- [x] Zintegrować historię i „Usuń kupione”
+- [x] Zweryfikować build i izolowany mobilny UI
+- [ ] P1: Sprawdzić zapis i synchronizację Firestore na 2 urządzeniach
+- [ ] P1: Wykonać osobny deploy po teście ręcznym
+
+Szczegóły: `docs/plans/weekly-meal-planning.md`.
+
+## Migracja Firebase do `zakupowo-v2` 🚧
+- [x] Przygotować bezpieczne narzędzie inventory / migrate / verify
+- [x] Zapisać lokalne reguły Firestore dla docelowego household
+- [x] Wykonać inwentaryzację starego i nowego projektu
+- [x] Przenieść atomowo 259 dokumentów do `zakupowo-v2`
+- [x] Zweryfikować historię, produkty, szablony i aktualną listę
+- [x] Przełączyć konfigurację aplikacji na `zakupowo-v2`
+- [x] Wykonać kontrolowany ręczny deploy do `zakupowo-v2`
+- [x] Skonfigurować GitHub Actions dla kolejnych deployów
+- [ ] Zachować `zakupowo-28267` jako rollback przez minimum 7 dni
+
+Szczegóły: `docs/plans/firebase-project-migration.md`.

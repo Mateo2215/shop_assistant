@@ -1,13 +1,24 @@
-import type { ShoppingItem } from '../types'
+import type { ShoppingItem, Weekday } from '../types'
 import { getCategory } from '../data/categories'
+import { getWeekdayShortLabel } from '../data/weekdays'
 
 interface ProductItemProps {
   item: ShoppingItem
+  days: Weekday[]
+  showDayTags?: boolean
   onToggle: (id: string, checked: boolean) => void
-  onRemove: (id: string) => void
+  onRemove: (item: ShoppingItem) => void
+  onEditDays: (item: ShoppingItem) => void
 }
 
-export default function ProductItem({ item, onToggle, onRemove }: ProductItemProps) {
+export default function ProductItem({
+  item,
+  days,
+  showDayTags = true,
+  onToggle,
+  onRemove,
+  onEditDays,
+}: ProductItemProps) {
   const category = getCategory(item.category)
 
   return (
@@ -32,29 +43,54 @@ export default function ProductItem({ item, onToggle, onRemove }: ProductItemPro
         )}
       </button>
 
-      <span
-        className={`flex-1 text-base transition-all duration-300 ${
-          item.checked
-            ? 'line-through text-slate-400 dark:text-slate-500'
-            : 'text-slate-900 dark:text-slate-100'
-        }`}
-      >
-        {item.name}
-        {item.quantity && (
-          <span className="text-sm text-slate-400 dark:text-slate-500 ml-1.5">
-            {item.quantity}
-            {item.unit ? ` ${item.unit}` : ''}
-          </span>
+      <div className="min-w-0 flex-1">
+        <p
+          className={`text-base transition-all duration-300 ${
+            item.checked
+              ? 'line-through text-slate-400 dark:text-slate-500'
+              : 'text-slate-900 dark:text-slate-100'
+          }`}
+        >
+          {item.name}
+          {item.quantity && (
+            <span className="ml-1.5 text-sm text-slate-400 dark:text-slate-500">
+              {item.quantity}
+              {item.unit ? ` ${item.unit}` : ''}
+            </span>
+          )}
+        </p>
+        {showDayTags && days.length > 0 && (
+          <div className="mt-1 flex flex-wrap gap-1">
+            {days.map((day) => (
+              <span
+                key={day}
+                className="rounded-full bg-indigo-50 px-1.5 py-0.5 text-[11px] font-semibold text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300"
+              >
+                {getWeekdayShortLabel(day)}
+              </span>
+            ))}
+          </div>
         )}
-      </span>
+      </div>
 
       <span className="text-lg flex-shrink-0" title={category.name}>
         {category.emoji}
       </span>
 
       <button
-        onClick={() => onRemove(item.id)}
-        className="text-slate-400 dark:text-slate-600 hover:text-red-400 active:text-red-300 transition-colors text-2xl leading-none flex-shrink-0 -mr-1"
+        type="button"
+        onClick={() => onEditDays(item)}
+        className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-base text-slate-400 transition-colors hover:bg-indigo-50 hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-slate-500 dark:hover:bg-indigo-500/10 dark:hover:text-indigo-300"
+        aria-label={`Ustaw dni dla produktu ${item.name}`}
+        title="Ustaw dni"
+      >
+        📅
+      </button>
+
+      <button
+        type="button"
+        onClick={() => onRemove(item)}
+        className="-mr-1 flex-shrink-0 text-2xl leading-none text-slate-400 transition-colors hover:text-red-400 focus:outline-none focus:ring-2 focus:ring-red-400 dark:text-slate-600"
         aria-label="Usuń produkt"
       >
         ×

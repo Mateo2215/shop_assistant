@@ -45,7 +45,22 @@
 **Rozwiązanie:** `npx firebase-tools login` (raz) → otwiera przeglądarkę → potem `npm run deploy` działa autonomicznie.
 **Następnym razem:** Dodaj `firebase login` do instrukcji setup projektu. `.firebaserc` z project ID musi być w repo.
 
+## Firebase CLI na Windows — certyfikaty systemowe
+**Problem:** `firebase-tools` uruchamiane przez Node może kończyć requesty błędem `unable to verify the first certificate`, mimo że konto Firebase jest poprawnie zalogowane.
+**Rozwiązanie:** Uruchamiać komendy Firebase CLI z `NODE_OPTIONS=--use-system-ca`, np. w PowerShellu: `$env:NODE_OPTIONS = '--use-system-ca'` przed `npx.cmd --yes firebase-tools ...`.
+**Następnym razem:** Gdy Firebase CLI zawiesza się lub kończy bez szczegółowego komunikatu, sprawdź `firebase-debug.log` pod kątem błędów certyfikatów zanim ponowisz logowanie.
+
 ## PWA ikony — generowanie przez sharp
 **Problem:** Potrzebujemy PNG ikon (192×192, 512×512) bez narzędzi graficznych.
 **Rozwiązanie:** SVG źródłowy w `public/icon.svg` + skrypt `scripts/generate-icons.mjs` + `sharp` jako devDep. Ikona jako path SVG (nie tekst) — brak zależności od fontów systemowych.
 **Następnym razem:** Zawsze używaj path zamiast `<text>` w SVG przeznaczonych do rasteryzacji — fonty mogą nie być dostępne w środowisku budowania.
+
+## Prywatny push a publiczna publikacja repo
+**Problem:** Brak sekretów w `.git` nie oznacza automatycznie, że repo można bezpiecznie upublicznić. Kod klienta ujawnia strukturę Firestore, a dokumentacja może ujawnić realny household ID i prywatny kontekst.
+**Rozwiązanie:** Rozdzielać dwa werdykty: push do prywatnego repo oraz ustawienie repo jako publiczne. Publiczna publikacja wymaga osobnego przeglądu reguł dostępu, dokumentacji, historii commitów, licencji i odtwarzalności setupu.
+**Następnym razem:** Przed publicznym GitHubem robić publication review obejmujący kod, historię Git, model autoryzacji i dane identyfikujące — nie tylko skan `.env`.
+
+## Zachowuj źródło przypisania zamiast spłaszczać tagi
+**Problem:** Samo pole `days` przy produkcie nie pozwala odróżnić dnia ustawionego ręcznie od dnia odziedziczonego z planu posiłku, więc bezpieczna edycja i sprzątanie byłyby niemożliwe.
+**Rozwiązanie:** Przechowywać osobno `manualDays`, `mealPlanIds` i `isStandalone`, a widoczne dni wyliczać jako sumę źródeł.
+**Następnym razem:** Gdy jedna cecha wynika z kilku niezależnych relacji, zapisuj relacje i ich pochodzenie zamiast wyłącznie końcowej, spłaszczonej wartości.

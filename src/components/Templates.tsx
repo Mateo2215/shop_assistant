@@ -1,10 +1,13 @@
 import { useState } from 'react'
-import type { Template, TemplateItem } from '../types'
+import type { MealPlan, Template, TemplateItem, Weekday } from '../types'
+import DayPickerModal from './DayPickerModal'
 import TemplateEditor from './TemplateEditor'
 
 interface TemplatesProps {
   templates: Template[]
+  mealPlans: MealPlan[]
   onAddFromTemplate: (template: Template) => Promise<void>
+  onPlanTemplate: (template: Template, days: Weekday[]) => Promise<void>
   onCreateTemplate: (name: string, emoji: string, items: TemplateItem[]) => Promise<void>
   onUpdateTemplate: (id: string, name: string, emoji: string, items: TemplateItem[]) => Promise<void>
   onDeleteTemplate: (id: string) => Promise<void>
@@ -12,7 +15,9 @@ interface TemplatesProps {
 
 export default function Templates({
   templates,
+  mealPlans,
   onAddFromTemplate,
+  onPlanTemplate,
   onCreateTemplate,
   onUpdateTemplate,
   onDeleteTemplate,
@@ -20,6 +25,8 @@ export default function Templates({
   const [search, setSearch] = useState('')
   const [adding, setAdding] = useState<string | null>(null)
   const [added, setAdded] = useState<string | null>(null)
+  const [planned, setPlanned] = useState<string | null>(null)
+  const [planning, setPlanning] = useState<Template | null>(null)
   const [expanded, setExpanded] = useState<string | null>(null)
   const [editing, setEditing] = useState<Template | null>(null)
   const [creating, setCreating] = useState(false)
@@ -53,6 +60,18 @@ export default function Templates({
   async function handleDelete(template: Template) {
     if (!confirm(`Usunąć szablon "${template.name}"?`)) return
     await onDeleteTemplate(template.id)
+  }
+
+  async function handlePlan(template: Template, days: Weekday[]) {
+    setAdding(template.id)
+    try {
+      await onPlanTemplate(template, days)
+      setPlanned(template.id)
+      setPlanning(null)
+      setTimeout(() => setPlanned(null), 2000)
+    } finally {
+      setAdding(null)
+    }
   }
 
   // Show editor screens
@@ -122,18 +141,6 @@ export default function Templates({
               </button>
             </div>
 
-            {/* Add to list */}
-            <button
-              onClick={() => handleAdd(template)}
-              disabled={adding === template.id}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-sm font-medium transition-colors ${
-                added === template.id
-                  ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30'
-                  : 'bg-indigo-600 text-white hover:bg-indigo-500 active:bg-indigo-700 disabled:opacity-50'
-              }`}
-            >
-              {adding === template.id ? '...' : added === template.id ? '✓' : '+ Dodaj'}
-            </button>
           </div>
 
           {/* Expanded ingredient list */}
@@ -152,8 +159,50 @@ export default function Templates({
               </ul>
             </div>
           )}
+
+          <div className="flex gap-2 px-4 pb-3">
+            <button
+              type="button"
+              onClick={() => handleAdd(template)}
+              disabled={adding === template.id}
+              className={`min-h-10 flex-1 rounded-xl px-3 text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                added === template.id
+                  ? 'border border-emerald-500/30 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                  : 'bg-indigo-600 text-white hover:bg-indigo-500 active:bg-indigo-700 disabled:opacity-50'
+              }`}
+            >
+              {adding === template.id ? '...' : added === template.id ? '✓ Dodano' : '+ Dodaj'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setPlanning(template)}
+              disabled={adding === template.id}
+              className={`min-h-10 flex-1 rounded-xl border px-3 text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 ${
+                planned === template.id
+                  ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                  : 'border-indigo-200 text-indigo-600 hover:bg-indigo-50 dark:border-indigo-500/30 dark:text-indigo-300 dark:hover:bg-indigo-500/10'
+              }`}
+            >
+              {planned === template.id ? '✓ Zaplanowano' : '📅 Zaplanuj'}
+            </button>
+          </div>
         </div>
       ))}
+
+      {planning && (
+        <DayPickerModal
+          title={`Zaplanuj: ${planning.name}`}
+          description="Wybierz co najmniej jeden nowy dzień. Ilości składników nie będą mnożone."
+          selectedDays={[]}
+          lockedDays={
+            mealPlans.find((plan) => plan.templateId === planning.id)?.days ?? []
+          }
+          allowEmpty={false}
+          saveLabel="Dodaj do planu"
+          onSave={(days) => handlePlan(planning, days)}
+          onClose={() => setPlanning(null)}
+        />
+      )}
     </div>
   )
 }

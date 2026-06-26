@@ -1,7 +1,9 @@
 # Zakupowo — Progress
 
-## Status: PROJEKT ZAKOŃCZONY ✅
+## Status: FAZA 4 ZAIMPLEMENTOWANA LOKALNIE 🚧
 **Live:** https://zakupowo-28267.web.app
+**Repo:** https://github.com/Mateo2215/shop_assistant (private, branch `main`)
+**Nowa funkcja:** tygodniowe planowanie posiłków jest gotowe lokalnie; wymaga jeszcze testu Firestore na 2 urządzeniach i osobnego deployu.
 
 ---
 
@@ -24,6 +26,15 @@
 - **Animacje** — checkbox pop (keyframe scale), slide-in nowych elementów listy
 - **Deploy** — Firebase Hosting, `npm run deploy`, SPA rewrite, cache headers
 - **Gazetka Kaufland** — zakładka z linkiem wychodzącym do gazetki (iframe blokowany przez X-Frame-Options, więc otwieranie w nowej karcie)
+
+## Faza 4 — Tygodniowe planowanie posiłków 🚧
+- Dni tygodnia przypisywane ręcznie do produktów
+- Widoki listy `Kategorie` i `Dni`, z preferencją zapisywaną lokalnie
+- Planowanie szablonów jako osobne dokumenty `mealPlans`
+- Współdzielone składniki bez duplikowania zakupów
+- Atomowe sprzątanie planów i produktów przez Firestore `writeBatch`
+- Build i izolowany test mobilnego UI zakończone powodzeniem
+- Pozostało: test zapisu/synchronizacji Firestore na 2 urządzeniach oraz deploy
 
 ## Komendy
 ```bash

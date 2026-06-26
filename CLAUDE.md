@@ -4,7 +4,7 @@
 
 **Zakupowo** — wspólna lista zakupów dla pary. PWA (Progressive Web App), mobile-first, po polsku, z real-time synchronizacją.
 
-> **Status: dostarczony i w użyciu.** Aplikacja jest live na https://zakupowo-28267.web.app i używana na co dzień. Ten dokument opisuje **stan rzeczywisty** wdrożonej aplikacji (nie plan budowy). Aktualizacje: `npm run deploy`.
+> **Status: dostarczony i w użyciu.** Aplikacja jest live na https://zakupowo-28267.web.app i używana na co dzień. Tygodniowe planowanie posiłków jest zaimplementowane lokalnie i oczekuje na test Firestore oraz osobny deploy. Aktualizacje: `npm run deploy`.
 
 ### Użytkownicy
 
@@ -48,7 +48,11 @@ Zakupowo/
 │   │   ├── Header.tsx                # tytuł + przełącznik dark mode
 │   │   ├── AddProduct.tsx            # pole szybkiego dodawania + autouzupełnianie
 │   │   ├── ProductItem.tsx
-│   │   ├── ShoppingList.tsx          # grupowanie po kategoriach + sekcja "Kupione"
+│   │   ├── ShoppingList.tsx          # przełączanie widoków + sekcja "Kupione"
+│   │   ├── CategoryListView.tsx      # grupowanie po kategoriach
+│   │   ├── DayListView.tsx           # grupowanie po dniach i posiłkach
+│   │   ├── DayPickerModal.tsx        # mobilny wybór wielu dni
+│   │   ├── ListViewToggle.tsx        # przełącznik Kategorie / Dni
 │   │   ├── Suggestions.tsx           # "Może potrzebujesz?"
 │   │   ├── Templates.tsx             # szablony przepisów
 │   │   ├── TemplateEditor.tsx        # tworzenie/edycja szablonów
@@ -60,6 +64,7 @@ Zakupowo/
 │   │   ├── useProducts.ts            # baza znanych produktów + purchaseCount
 │   │   ├── useSuggestions.ts
 │   │   ├── useTemplates.ts           # CRUD + soft-delete defaultów + useCount
+│   │   ├── useMealPlans.ts           # plany posiłków + atomowe sprzątanie
 │   │   ├── useHistory.ts             # zapis/odczyt zamkniętych list
 │   │   ├── useStatistics.ts          # agregacje pod wykresy
 │   │   └── useTheme.ts               # dark mode (localStorage)
@@ -67,6 +72,7 @@ Zakupowo/
 │   │   └── index.ts                  # Product, Template, ActiveTab, ...
 │   └── data/
 │       ├── categories.ts             # 21 kategorii + ikony + kolory (źródło prawdy)
+│       ├── weekdays.ts               # kolejność dni i obliczanie efektywnych tagów
 │       ├── defaultProducts.ts        # baza popularnych produktów PL
 │       └── defaultTemplates.ts       # 46 gotowych szablonów przepisów
 └── tasks/
@@ -151,6 +157,17 @@ Zakupowo/
 - Przełącznik w nagłówku, class-based (`darkMode: 'class'`), preferencja w `localStorage`
 - Anti-FOUC: inline `<script>` w `index.html` ustawia klasę `.dark` przed renderem Reacta
 
+### 9. Tygodniowe planowanie posiłków 🚧 (lokalnie, przed deployem)
+
+- Produkt może mieć wiele ręcznie przypisanych dni tygodnia
+- Lista ma widoki `Kategorie` i `Dni`; wybór jest zapisywany w `localStorage`
+- Szablon można dodać zwyczajnie albo zaplanować na jeden lub kilka dni
+- Plan posiłku przechowuje migawkę nazwy i składników z chwili planowania
+- Wspólny składnik wielu posiłków pozostaje jednym dokumentem listy zakupów
+- Dni odziedziczone z posiłku są edytowane przez cały plan, nie przez pojedynczy produkt
+- Historia celowo nie zapisuje dni ani planów
+- Usuwanie kupionych produktów czyści puste plany automatycznie
+
 ---
 
 ## Design i UX
@@ -222,12 +239,27 @@ households/{householdId}/
   shoppingList/           # Aktywna lista zakupów
   {productId}/
     name: string
-    quantity: number
+    quantity: string
     unit: string         # "szt", "kg", "l", "op" (opakowanie)
     category: string     # klucz kategorii
     checked: boolean
-    addedAt: timestamp
-    checkedAt: timestamp | null
+    manualDays: string[] # ręcznie przypisane dni
+    mealPlanIds: string[]
+    isStandalone: boolean
+    createdAt: timestamp
+    updatedAt: timestamp
+
+mealPlans/              # Zaplanowane użycia szablonów
+  {templateId}/
+    templateId: string
+    name: string
+    emoji: string
+    days: string[]
+    items: [
+      { shoppingItemId: string, name: string, quantity: string, unit: string, category: string }
+    ]
+    createdAt: timestamp
+    updatedAt: timestamp
 
 products/               # Baza znanych produktów (do autouzupełniania)
   {productId}/

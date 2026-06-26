@@ -1,0 +1,10 @@
+// Restricts the unauthenticated private app to its single known household path.
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /households/nasze-zakupy/{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
