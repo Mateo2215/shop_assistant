@@ -64,3 +64,8 @@
 **Problem:** Samo pole `days` przy produkcie nie pozwala odróżnić dnia ustawionego ręcznie od dnia odziedziczonego z planu posiłku, więc bezpieczna edycja i sprzątanie byłyby niemożliwe.
 **Rozwiązanie:** Przechowywać osobno `manualDays`, `mealPlanIds` i `isStandalone`, a widoczne dni wyliczać jako sumę źródeł.
 **Następnym razem:** Gdy jedna cecha wynika z kilku niezależnych relacji, zapisuj relacje i ich pochodzenie zamiast wyłącznie końcowej, spłaszczonej wartości.
+
+## Handoff designu jako tokeny, nie kod produkcyjny
+**Problem:** Prototypy `.dc.html` z redesignu pokazują docelowy wygląd, ale nie są kodem React/Tailwind do bezpośredniego kopiowania.
+**Rozwiązanie:** Przenieść decyzje jako tokeny kolorów, typografię, ikony i klasy komponentów, zostawiając hooki i zachowanie aplikacji bez zmian.
+**Następnym razem:** Najpierw wyciągnij system wizualny z handoffu, potem wdrażaj komponenty etapami i weryfikuj małe viewporty przed pushem.

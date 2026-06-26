@@ -13,16 +13,16 @@ export default function ListViewToggle({
   daysDisabled = false,
 }: ListViewToggleProps) {
   return (
-    <div className="border-b border-slate-200 bg-white px-3 py-2.5 dark:border-slate-800 dark:bg-slate-900">
-      <div className="grid grid-cols-2 rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
+    <div className="border-b border-market-lightBorder bg-market-lightSurface px-4 py-3 dark:border-white/[0.04] dark:bg-market-header">
+      <div className="grid grid-cols-2 rounded-[14px] border border-market-lightBorder bg-market-lightRaised p-1 dark:border-white/[0.06] dark:bg-market-raised">
         <button
           type="button"
           onClick={() => onChange('categories')}
           aria-pressed={value === 'categories'}
-          className={`min-h-10 rounded-lg text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+          className={`min-h-10 rounded-[10px] text-[14.5px] font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-fresh-green ${
             value === 'categories'
-              ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-700 dark:text-indigo-300'
-              : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+              ? 'bg-gradient-to-br from-fresh-violetLight to-fresh-greenStrong text-white shadow-sm dark:from-fresh-violet dark:to-fresh-green'
+              : 'text-market-lightMuted hover:text-market-lightText dark:text-market-muted dark:hover:text-market-text'
           }`}
         >
           Kategorie
@@ -32,10 +32,10 @@ export default function ListViewToggle({
           onClick={() => onChange('days')}
           disabled={daysDisabled}
           aria-pressed={value === 'days'}
-          className={`min-h-10 rounded-lg text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-40 ${
+          className={`min-h-10 rounded-[10px] text-[14.5px] font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-fresh-green disabled:cursor-not-allowed disabled:opacity-40 ${
             value === 'days'
-              ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-700 dark:text-indigo-300'
-              : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+              ? 'bg-gradient-to-br from-fresh-violetLight to-fresh-greenStrong text-white shadow-sm dark:from-fresh-violet dark:to-fresh-green'
+              : 'text-market-lightMuted hover:text-market-lightText dark:text-market-muted dark:hover:text-market-text'
           }`}
         >
           Dni

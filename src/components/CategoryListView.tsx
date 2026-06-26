@@ -41,14 +41,14 @@ export default function CategoryListView({
           const category = getCategory(categoryId)
           return (
             <section key={categoryId} className="mb-1">
-              <div className={`flex items-center gap-2 px-4 py-1.5 ${category.bgColor}`}>
+              <div className={`flex items-center gap-2 border-l-[3px] px-4 py-2.5 ${category.bgColor} ${category.borderColor}`}>
                 <span className="text-base">{category.emoji}</span>
-                <h2 className={`text-sm font-semibold ${category.textColor}`}>{category.name}</h2>
-                <span className="ml-auto text-xs text-slate-400 dark:text-slate-500">
+                <h2 className={`font-brand text-[15px] font-bold ${category.textColor}`}>{category.name}</h2>
+                <span className={`ml-auto rounded-full px-2.5 py-0.5 text-[13px] font-bold ${category.badgeColor}`}>
                   {categoryItems.length}
                 </span>
               </div>
-              <div className="bg-white dark:bg-slate-900">
+              <div className="bg-market-lightSurface dark:bg-market-bg">
                 {categoryItems.map((item) => (
                   <ProductItem
                     key={item.id}

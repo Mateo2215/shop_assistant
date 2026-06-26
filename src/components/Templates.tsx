@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { CalendarDays, ChevronDown, ChevronUp, Pencil, Search, Trash2 } from 'lucide-react'
 import type { MealPlan, Template, TemplateItem, Weekday } from '../types'
 import DayPickerModal from './DayPickerModal'
 import TemplateEditor from './TemplateEditor'
@@ -85,59 +86,72 @@ export default function Templates({
   return (
     <div className="pb-28">
       {/* Search + add button */}
-      <div className="px-3 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex gap-2 sticky top-[57px] z-10">
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Szukaj szablonu..."
-          className="flex-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        />
+      <div className="sticky top-[var(--app-header-height)] z-10 flex gap-2.5 border-b border-market-lightBorder bg-market-lightSurface px-4 py-4 dark:border-white/[0.04] dark:bg-market-header">
+        <label className="relative flex-1">
+          <span className="sr-only">Szukaj szablonu</span>
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-market-lightMuted dark:text-market-subtle" size={17} />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Szukaj szablonu..."
+            className="min-h-11 w-full rounded-[14px] border border-market-lightInput bg-market-lightRaised pl-10 pr-4 text-sm font-semibold text-market-lightText placeholder-market-lightSubtle focus:outline-none focus:ring-2 focus:ring-fresh-violetLight dark:border-white/[0.07] dark:bg-market-elevated dark:text-market-text dark:placeholder-market-subtle dark:focus:ring-fresh-green"
+          />
+        </label>
         <button
           onClick={() => setCreating(true)}
-          className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-xl text-sm font-medium transition-colors flex-shrink-0"
+          className="min-h-11 flex-shrink-0 rounded-[14px] bg-gradient-to-br from-fresh-violetLight to-fresh-greenStrong px-4 text-sm font-bold text-white shadow-[0_6px_16px_rgba(78,184,127,0.28)] transition-transform hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-fresh-greenStrong dark:from-fresh-violet dark:to-fresh-green"
         >
           + Nowy
         </button>
       </div>
 
       {filtered.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 text-slate-400 dark:text-slate-500">
+        <div className="flex flex-col items-center justify-center px-6 py-16 text-center text-market-lightMuted dark:text-market-muted">
           <p className="text-4xl mb-3">🔍</p>
           <p className="text-sm">Brak wyników dla „{search}"</p>
         </div>
       )}
 
+      <div className="space-y-3 p-4">
       {filtered.map((template) => (
-        <div key={template.id} className="border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
-          <div className="flex items-center px-4 py-3 gap-3">
+        <div key={template.id} className="overflow-hidden rounded-[18px] border border-market-lightBorder bg-market-lightSurface shadow-sm dark:border-white/[0.06] dark:bg-market-surface">
+          <div className="flex items-center gap-3 px-4 py-3.5">
             {/* Expand toggle */}
             <button
               onClick={() => setExpanded(expanded === template.id ? null : template.id)}
-              className="flex items-center gap-3 flex-1 text-left min-w-0"
+              className="flex min-w-0 flex-1 items-center gap-3 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-fresh-green"
+              aria-expanded={expanded === template.id}
             >
-              <span className="text-2xl flex-shrink-0">{template.emoji}</span>
+              <span className="flex h-[42px] w-[42px] flex-shrink-0 items-center justify-center rounded-xl bg-fresh-greenStrong/10 text-2xl dark:bg-fresh-green/10">{template.emoji}</span>
               <div className="min-w-0">
-                <p className="font-medium text-slate-900 dark:text-slate-100 truncate">{template.name}</p>
-                <p className="text-xs text-slate-500">{template.items.length} składników</p>
+                <p className="truncate text-base font-bold text-market-lightText dark:text-market-text">{template.name}</p>
+                <p className="mt-0.5 text-xs font-semibold text-market-lightMuted dark:text-market-muted">{template.items.length} składników</p>
               </div>
+              {expanded === template.id ? (
+                <ChevronUp className="text-market-lightMuted dark:text-market-muted" size={17} />
+              ) : (
+                <ChevronDown className="text-market-lightMuted dark:text-market-muted" size={17} />
+              )}
             </button>
 
             {/* Actions: edit and delete for all templates */}
-            <div className="flex gap-1 flex-shrink-0">
+            <div className="flex flex-shrink-0 gap-1">
               <button
                 onClick={() => setEditing(template)}
-                className="p-2 text-slate-400 dark:text-slate-500 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
+                className="flex h-10 w-10 items-center justify-center rounded-full text-fresh-violetLight transition-colors hover:bg-fresh-violetLight/10 focus:outline-none focus:ring-2 focus:ring-fresh-violetLight dark:text-fresh-violet"
                 title="Edytuj"
+                aria-label={`Edytuj szablon ${template.name}`}
               >
-                ✏️
+                <Pencil size={18} />
               </button>
               <button
                 onClick={() => handleDelete(template)}
-                className="p-2 text-slate-400 dark:text-slate-500 hover:text-red-400 transition-colors"
+                className="flex h-10 w-10 items-center justify-center rounded-full text-market-lightMuted transition-colors hover:bg-fresh-danger/10 hover:text-fresh-danger focus:outline-none focus:ring-2 focus:ring-fresh-danger dark:text-market-subtle"
                 title="Usuń"
+                aria-label={`Usuń szablon ${template.name}`}
               >
-                🗑️
+                <Trash2 size={18} />
               </button>
             </div>
 
@@ -145,14 +159,14 @@ export default function Templates({
 
           {/* Expanded ingredient list */}
           {expanded === template.id && (
-            <div className="px-4 pb-3 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800">
-              <ul className="space-y-1.5 pt-2">
+            <div className="border-t border-market-lightBorder bg-market-lightRaised px-4 pb-3 dark:border-white/[0.04] dark:bg-market-raised">
+              <ul className="space-y-1.5 pt-3">
                 {template.items.map((item, i) => (
-                  <li key={i} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                    <span className="text-slate-400 dark:text-slate-600 text-xs">•</span>
+                  <li key={i} className="flex items-center gap-2 text-sm font-semibold text-market-lightMuted dark:text-market-muted">
+                    <span className="text-xs text-fresh-greenStrong dark:text-fresh-green">•</span>
                     <span>{item.name}</span>
                     {item.quantity && (
-                      <span className="text-slate-400 dark:text-slate-500">{item.quantity} {item.unit}</span>
+                      <span className="text-market-lightSubtle dark:text-market-subtle">{item.quantity} {item.unit}</span>
                     )}
                   </li>
                 ))}
@@ -160,15 +174,15 @@ export default function Templates({
             </div>
           )}
 
-          <div className="flex gap-2 px-4 pb-3">
+          <div className="flex gap-2 px-4 pb-4">
             <button
               type="button"
               onClick={() => handleAdd(template)}
               disabled={adding === template.id}
-              className={`min-h-10 flex-1 rounded-xl px-3 text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+              className={`min-h-11 flex-1 rounded-xl px-3 text-sm font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-fresh-green ${
                 added === template.id
-                  ? 'border border-emerald-500/30 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
-                  : 'bg-indigo-600 text-white hover:bg-indigo-500 active:bg-indigo-700 disabled:opacity-50'
+                  ? 'border border-fresh-greenStrong/30 bg-fresh-greenStrong/15 text-fresh-greenStrong dark:border-fresh-green/30 dark:bg-fresh-green/15 dark:text-fresh-green'
+                  : 'bg-gradient-to-br from-fresh-violetLight to-fresh-greenStrong text-white hover:brightness-105 active:brightness-95 disabled:opacity-50 dark:from-fresh-violet dark:to-fresh-green'
               }`}
             >
               {adding === template.id ? '...' : added === template.id ? '✓ Dodano' : '+ Dodaj'}
@@ -177,17 +191,22 @@ export default function Templates({
               type="button"
               onClick={() => setPlanning(template)}
               disabled={adding === template.id}
-              className={`min-h-10 flex-1 rounded-xl border px-3 text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 ${
+              className={`inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 text-sm font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-fresh-green disabled:opacity-50 ${
                 planned === template.id
-                  ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                  : 'border-indigo-200 text-indigo-600 hover:bg-indigo-50 dark:border-indigo-500/30 dark:text-indigo-300 dark:hover:bg-indigo-500/10'
+                  ? 'border-fresh-greenStrong/30 bg-fresh-greenStrong/10 text-fresh-greenStrong dark:border-fresh-green/30 dark:bg-fresh-green/10 dark:text-fresh-green'
+                  : 'border-market-lightInput text-market-lightText hover:bg-market-lightRaised dark:border-white/[0.12] dark:text-[#cdd6cf] dark:hover:bg-market-raised'
               }`}
             >
-              {planned === template.id ? '✓ Zaplanowano' : '📅 Zaplanuj'}
+              {planned === template.id ? '✓ Zaplanowano' : (
+                <>
+                  <CalendarDays size={16} /> Zaplanuj
+                </>
+              )}
             </button>
           </div>
         </div>
       ))}
+      </div>
 
       {planning && (
         <DayPickerModal

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ChevronDown, ChevronUp, Clock, X } from 'lucide-react'
 import type { HistoryEntry } from '../types'
 
 interface HistoryProps {
@@ -14,10 +15,10 @@ export default function History({ history, onRepeat, onDelete }: HistoryProps) {
 
   if (history.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-slate-500 px-6 text-center">
-        <div className="text-5xl mb-3">🕐</div>
-        <p className="text-lg font-medium text-slate-500 dark:text-slate-400">Brak historii</p>
-        <p className="text-sm mt-1">
+      <div className="flex flex-col items-center justify-center px-6 py-20 text-center text-market-lightMuted dark:text-market-muted">
+        <Clock className="mb-3 text-fresh-greenStrong dark:text-fresh-green" size={42} />
+        <p className="font-brand text-lg font-bold text-market-lightText dark:text-market-text">Brak historii</p>
+        <p className="mt-1 text-sm">
           Historia pojawi się po wyczyszczeniu kupionych produktów
         </p>
       </div>
@@ -44,15 +45,19 @@ export default function History({ history, onRepeat, onDelete }: HistoryProps) {
   }
 
   return (
-    <div className="pb-28">
+    <div className="space-y-3 p-4 pb-28">
       {history.map((entry) => (
-        <div key={entry.id} className="border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
-          <div className="flex items-center px-4 py-3 gap-3">
+        <div key={entry.id} className="overflow-hidden rounded-2xl border border-market-lightBorder bg-market-lightSurface shadow-sm dark:border-white/[0.06] dark:bg-market-surface">
+          <div className="flex items-center gap-3 px-4 py-3.5">
+            <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-fresh-greenStrong/10 text-fresh-greenStrong dark:bg-fresh-green/10 dark:text-fresh-green">
+              <Clock size={22} />
+            </span>
             <button
               onClick={() => setExpanded(expanded === entry.id ? null : entry.id)}
-              className="flex-1 text-left min-w-0"
+              className="min-w-0 flex-1 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-fresh-green"
+              aria-expanded={expanded === entry.id}
             >
-              <p className="font-medium text-slate-900 dark:text-slate-100 capitalize">
+              <p className="truncate text-[15px] font-bold capitalize text-market-lightText dark:text-market-text">
                 {entry.date.toLocaleDateString('pl-PL', {
                   weekday: 'long',
                   day: 'numeric',
@@ -60,18 +65,16 @@ export default function History({ history, onRepeat, onDelete }: HistoryProps) {
                   year: 'numeric',
                 })}
               </p>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="mt-0.5 flex items-center gap-1 text-xs font-semibold text-market-lightMuted dark:text-market-muted">
                 {entry.items.length} produktów
-                <span className="ml-1 text-slate-400 dark:text-slate-700">
-                  {expanded === entry.id ? '▲' : '▼'}
-                </span>
+                {expanded === entry.id ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
               </p>
             </button>
 
             <button
               onClick={() => handleRepeat(entry)}
               disabled={repeating === entry.id}
-              className="flex-shrink-0 text-sm text-indigo-600 dark:text-indigo-400 border border-indigo-300 dark:border-indigo-800 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 active:bg-indigo-100 dark:active:bg-indigo-500/20 px-3 py-1.5 rounded-xl transition-colors disabled:opacity-50"
+              className="min-h-10 flex-shrink-0 rounded-xl border border-fresh-greenStrong/40 bg-fresh-greenStrong/10 px-3 text-sm font-bold text-fresh-greenStrong transition-colors hover:bg-fresh-greenStrong/15 focus:outline-none focus:ring-2 focus:ring-fresh-greenStrong disabled:opacity-50 dark:border-fresh-green/40 dark:bg-fresh-green/10 dark:text-fresh-green"
             >
               {repeating === entry.id ? '...' : 'Powtórz'}
             </button>
@@ -79,22 +82,23 @@ export default function History({ history, onRepeat, onDelete }: HistoryProps) {
             <button
               onClick={() => handleDelete(entry)}
               disabled={deleting === entry.id}
-              className="flex-shrink-0 text-slate-400 dark:text-slate-600 hover:text-red-400 transition-colors text-xl leading-none disabled:opacity-50 pl-1"
+              className="flex h-10 w-9 flex-shrink-0 items-center justify-center rounded-full text-market-lightMuted transition-colors hover:bg-fresh-danger/10 hover:text-fresh-danger focus:outline-none focus:ring-2 focus:ring-fresh-danger disabled:opacity-50 dark:text-market-subtle"
               title="Usuń z historii"
+              aria-label="Usuń z historii"
             >
-              ×
+              <X size={17} />
             </button>
           </div>
 
           {expanded === entry.id && (
-            <div className="px-4 pb-3 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800">
-              <ul className="space-y-1.5 pt-2">
+            <div className="border-t border-market-lightBorder bg-market-lightRaised px-4 pb-3 dark:border-white/[0.04] dark:bg-market-raised">
+              <ul className="space-y-1.5 pt-3">
                 {entry.items.map((item, i) => (
-                  <li key={i} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                    <span className="text-slate-400 dark:text-slate-600 text-xs">•</span>
+                  <li key={i} className="flex items-center gap-2 text-sm font-semibold text-market-lightMuted dark:text-market-muted">
+                    <span className="text-xs text-fresh-greenStrong dark:text-fresh-green">•</span>
                     <span>{item.name}</span>
                     {item.quantity && (
-                      <span className="text-slate-400 dark:text-slate-500">{item.quantity} {item.unit}</span>
+                      <span className="text-market-lightSubtle dark:text-market-subtle">{item.quantity} {item.unit}</span>
                     )}
                   </li>
                 ))}

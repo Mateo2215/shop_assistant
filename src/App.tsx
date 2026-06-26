@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { ExternalLink, Newspaper } from 'lucide-react'
 import type {
   ActiveTab,
   HistoryEntry,
@@ -174,7 +175,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col max-w-lg mx-auto relative bg-slate-50 dark:bg-slate-950">
+    <div className="relative mx-auto flex min-h-screen max-w-lg flex-col overflow-x-hidden bg-market-lightBg text-market-lightText shadow-[0_24px_60px_rgba(0,0,0,0.12)] dark:bg-market-bg dark:text-market-text">
       <Header
         checkedCount={checkedCount}
         onClearChecked={handleClearChecked}
@@ -237,19 +238,21 @@ export default function App() {
       )}
 
       {activeTab === 'gazetka' && (
-        <div className="flex flex-col items-center justify-center py-20 gap-5 px-6">
-          <div className="text-5xl">🗞️</div>
+        <div className="flex flex-1 flex-col items-center justify-center px-6 py-20 text-center">
+          <div className="mb-5 flex h-[84px] w-[84px] items-center justify-center rounded-[22px] bg-fresh-greenStrong/10 text-fresh-greenStrong dark:bg-fresh-green/10 dark:text-fresh-green">
+            <Newspaper size={40} strokeWidth={1.7} />
+          </div>
           <div className="text-center">
-            <p className="text-lg font-medium text-slate-900 dark:text-slate-100">Gazetka Kaufland</p>
-            <p className="text-sm text-slate-500 mt-1">Aktualne promocje i oferty</p>
+            <p className="font-brand text-xl font-bold text-market-lightText dark:text-market-text">Gazetka Kaufland</p>
+            <p className="mt-1 text-sm text-market-lightMuted dark:text-market-muted">Aktualne promocje i oferty</p>
           </div>
           <a
             href="https://www.kaufland.pl/oferta/gazetka.html"
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-red-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-red-500 active:bg-red-700 transition-colors shadow-sm"
+            className="mt-6 inline-flex min-h-12 items-center justify-center gap-2 rounded-[14px] bg-gradient-to-br from-fresh-violetLight to-fresh-greenStrong px-7 text-[15px] font-bold text-white shadow-[0_6px_16px_rgba(78,184,127,0.28)] transition-transform hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-fresh-greenStrong dark:from-fresh-violet dark:to-fresh-green dark:shadow-[0_6px_16px_rgba(124,180,140,0.30)]"
           >
-            Otwórz gazetkę →
+            Otwórz gazetkę <ExternalLink size={17} />
           </a>
         </div>
       )}

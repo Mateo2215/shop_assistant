@@ -27,6 +27,8 @@ export interface Category {
   emoji: string
   bgColor: string    // Tailwind classes — includes both light and dark: variants
   textColor: string  // Tailwind classes — includes both light and dark: variants
+  borderColor: string
+  badgeColor: string
 }
 
 export interface ShoppingItem {

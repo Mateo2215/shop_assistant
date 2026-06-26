@@ -1,3 +1,4 @@
+import { BarChart3, BookOpen, ClipboardList, Clock, Newspaper } from 'lucide-react'
 import type { ActiveTab } from '../types'
 
 interface BottomNavProps {
@@ -5,31 +6,36 @@ interface BottomNavProps {
   onChange: (tab: ActiveTab) => void
 }
 
-const TABS: { id: ActiveTab; label: string; emoji: string }[] = [
-  { id: 'list',        label: 'Lista',      emoji: '📋' },
-  { id: 'templates',   label: 'Szablony',   emoji: '📖' },
-  { id: 'historia',    label: 'Historia',   emoji: '🕐' },
-  { id: 'statystyki',  label: 'Statystyki', emoji: '📊' },
-  { id: 'gazetka',     label: 'Gazetka',    emoji: '🗞️' },
+const TABS: { id: ActiveTab; label: string; icon: typeof ClipboardList }[] = [
+  { id: 'list',        label: 'Lista',      icon: ClipboardList },
+  { id: 'templates',   label: 'Szablony',   icon: BookOpen },
+  { id: 'historia',    label: 'Historia',   icon: Clock },
+  { id: 'statystyki',  label: 'Statystyki', icon: BarChart3 },
+  { id: 'gazetka',     label: 'Gazetka',    icon: Newspaper },
 ]
 
 export default function BottomNav({ active, onChange }: BottomNavProps) {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 flex z-10 pb-safe max-w-lg mx-auto">
-      {TABS.map((tab) => (
-        <button
-          key={tab.id}
-          onClick={() => onChange(tab.id)}
-          className={`flex-1 flex flex-col items-center pt-2 pb-3 transition-colors ${
-            active === tab.id
-              ? 'text-indigo-600 dark:text-indigo-400'
-              : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-400'
-          }`}
-        >
-          <span className="text-xl leading-none">{tab.emoji}</span>
-          <span className="text-xs mt-1 font-medium">{tab.label}</span>
-        </button>
-      ))}
+    <nav className="fixed bottom-0 left-0 right-0 z-20 mx-auto flex max-w-lg border-t border-black/[0.07] bg-market-lightSurface px-1 pb-safe dark:border-white/[0.05] dark:bg-market-header">
+      {TABS.map((tab) => {
+        const Icon = tab.icon
+        const selected = active === tab.id
+        return (
+          <button
+            key={tab.id}
+            onClick={() => onChange(tab.id)}
+            className={`flex min-h-[66px] flex-1 flex-col items-center justify-center gap-1.5 pb-3 pt-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-fresh-green ${
+              selected
+                ? 'font-bold text-fresh-greenStrong dark:text-fresh-green'
+                : 'font-semibold text-[#8b938c] hover:text-market-lightMuted dark:text-[#8b978c] dark:hover:text-market-muted'
+            }`}
+            aria-current={selected ? 'page' : undefined}
+          >
+            <Icon size={22} strokeWidth={2} />
+            <span className="text-[11px] leading-none">{tab.label}</span>
+          </button>
+        )
+      })}
     </nav>
   )
 }

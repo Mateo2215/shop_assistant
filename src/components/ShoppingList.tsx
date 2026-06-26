@@ -1,4 +1,5 @@
 import type { MealPlan, ShoppingItem, ShoppingListView } from '../types'
+import { AlertTriangle, ShoppingCart } from 'lucide-react'
 import { getEffectiveDays } from '../data/weekdays'
 import CategoryListView from './CategoryListView'
 import DayListView from './DayListView'
@@ -36,9 +37,9 @@ export default function ShoppingList({
 }: ShoppingListProps) {
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20 text-slate-500">
+      <div className="flex items-center justify-center py-20 text-market-lightMuted dark:text-market-muted">
         <div className="text-center">
-          <div className="text-4xl mb-3 animate-pulse">🛒</div>
+          <ShoppingCart className="mx-auto mb-3 animate-pulse text-fresh-greenStrong dark:text-fresh-green" size={38} />
           <p className="text-sm">Ładowanie listy...</p>
         </div>
       </div>
@@ -49,9 +50,9 @@ export default function ShoppingList({
     return (
       <div className="flex items-center justify-center py-20">
         <div className="text-center px-6">
-          <div className="text-4xl mb-3">⚠️</div>
-          <p className="text-slate-700 dark:text-slate-300 font-medium">Błąd połączenia</p>
-          <p className="text-sm text-slate-500 mt-1">{error}</p>
+          <AlertTriangle className="mx-auto mb-3 text-fresh-danger" size={38} />
+          <p className="font-bold text-market-lightText dark:text-market-text">Błąd połączenia</p>
+          <p className="mt-1 text-sm text-market-lightMuted dark:text-market-muted">{error}</p>
         </div>
       </div>
     )
@@ -69,21 +70,23 @@ export default function ShoppingList({
       />
 
       {mealPlansError && (
-        <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
+        <div className="border-b border-amber-300 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-300">
           {mealPlansError} Widok kategorii nadal działa.
         </div>
       )}
 
       {view === 'days' && mealPlansLoading && (
-        <div className="px-4 py-4 text-center text-sm text-slate-500">
+        <div className="px-4 py-4 text-center text-sm text-market-lightMuted dark:text-market-muted">
           Ładowanie planów posiłków...
         </div>
       )}
 
       {unchecked.length === 0 && checked.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-slate-500">
-          <div className="mb-3 text-5xl">🛒</div>
-          <p className="text-lg font-medium text-slate-500 dark:text-slate-400">Lista jest pusta</p>
+        <div className="flex flex-col items-center justify-center px-6 py-20 text-center text-market-lightMuted dark:text-market-muted">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-fresh-greenStrong/10 text-fresh-greenStrong dark:bg-fresh-green/10 dark:text-fresh-green">
+            <ShoppingCart size={34} />
+          </div>
+          <p className="font-brand text-lg font-bold text-market-lightText dark:text-market-text">Lista jest pusta</p>
           <p className="mt-1 text-sm">Dodaj pierwszy produkt powyżej</p>
         </div>
       ) : view === 'categories' ? (
@@ -107,12 +110,12 @@ export default function ShoppingList({
 
       {checked.length > 0 && (
         <div className="mt-3">
-          <div className="px-4 py-1.5 bg-slate-100 dark:bg-slate-800/50 flex items-center gap-2">
+          <div className="flex items-center gap-2 bg-fresh-greenStrong/10 px-4 py-2 dark:bg-fresh-green/10">
             <span className="text-base">✅</span>
-            <span className="text-sm font-semibold text-slate-500">Kupione</span>
-            <span className="ml-auto text-xs text-slate-400 dark:text-slate-600">{checked.length}</span>
+            <span className="font-brand text-sm font-bold text-fresh-greenStrong dark:text-fresh-green">Kupione</span>
+            <span className="ml-auto rounded-full bg-fresh-greenStrong/10 px-2 py-0.5 text-xs font-bold text-fresh-greenStrong dark:bg-fresh-green/15 dark:text-fresh-green">{checked.length}</span>
           </div>
-          <div className="bg-white dark:bg-slate-900">
+          <div className="bg-market-lightSurface dark:bg-market-bg">
             {checked.map((item) => (
               <ProductItem
                 key={item.id}

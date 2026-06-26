@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { RotateCcw } from 'lucide-react'
 import {
   BarChart,
   Bar,
@@ -21,14 +22,14 @@ interface StatisticsProps {
   onReset: () => Promise<void>
 }
 
-// Indigo-violet brand palette for charts
+// Fresh Market chart palette.
 const CHART_COLORS = [
-  '#6366f1', // indigo-500
-  '#8b5cf6', // violet-500
-  '#3b82f6', // blue-500
-  '#10b981', // emerald-500
-  '#f59e0b', // amber-500
-  '#f43f5e', // rose-500
+  '#a98bf0',
+  '#7fcb9e',
+  '#6f8fc4',
+  '#e08aa0',
+  '#f4c25a',
+  '#4eb87f',
 ]
 
 interface KpiCardProps {
@@ -36,15 +37,16 @@ interface KpiCardProps {
   value: number | string
   label: string
   note?: string
+  tone?: 'violet' | 'green'
 }
 
-function KpiCard({ emoji, value, label, note }: KpiCardProps) {
+function KpiCard({ emoji, value, label, note, tone = 'violet' }: KpiCardProps) {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col gap-1">
+    <div className="flex flex-col gap-1 rounded-2xl border border-market-lightBorder bg-market-lightSurface p-4 shadow-sm dark:border-white/[0.06] dark:bg-market-surface">
       <span className="text-2xl leading-none">{emoji}</span>
-      <span className="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">{value}</span>
-      <span className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-tight">{label}</span>
-      {note && <span className="text-[10px] text-slate-400 dark:text-slate-600">{note}</span>}
+      <span className={`mt-1 font-brand text-[28px] font-bold ${tone === 'green' ? 'text-fresh-greenStrong dark:text-fresh-green' : 'text-fresh-violetLight dark:text-fresh-violet'}`}>{value}</span>
+      <span className="text-xs font-semibold leading-tight text-market-lightMuted dark:text-market-muted">{label}</span>
+      {note && <span className="text-[10px] text-market-lightSubtle dark:text-market-subtle">{note}</span>}
     </div>
   )
 }
@@ -53,7 +55,7 @@ function KpiCard({ emoji, value, label, note }: KpiCardProps) {
 function CustomBarTooltip({ active, payload }: { active?: boolean; payload?: { value: number }[] }) {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-slate-800 text-white text-xs rounded-lg px-3 py-2 shadow-lg">
+    <div className="rounded-lg bg-market-lightText px-3 py-2 text-xs text-white shadow-lg dark:bg-market-elevated">
       Kupiono: <strong>{payload[0].value}×</strong>
     </div>
   )
@@ -62,7 +64,7 @@ function CustomBarTooltip({ active, payload }: { active?: boolean; payload?: { v
 function CustomPieTooltip({ active, payload }: { active?: boolean; payload?: { name: string; value: number }[] }) {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-slate-800 text-white text-xs rounded-lg px-3 py-2 shadow-lg">
+    <div className="rounded-lg bg-market-lightText px-3 py-2 text-xs text-white shadow-lg dark:bg-market-elevated">
       {payload[0].name}: <strong>{payload[0].value} szt.</strong>
     </div>
   )
@@ -84,20 +86,20 @@ export default function Statistics({ firestoreProducts, history, allTemplates, o
 
   if (!stats.hasData) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-slate-500 px-6 text-center">
+      <div className="flex flex-col items-center justify-center px-6 py-20 text-center text-market-lightMuted dark:text-market-muted">
         <div className="text-5xl mb-3">📊</div>
-        <p className="text-lg font-medium text-slate-500 dark:text-slate-400">Brak danych</p>
+        <p className="font-brand text-lg font-bold text-market-lightText dark:text-market-text">Brak danych</p>
         <p className="text-sm mt-1">Statystyki pojawią się po pierwszych zakupach</p>
       </div>
     )
   }
 
   return (
-    <div className="pb-28 px-4 py-4 space-y-5">
+    <div className="space-y-5 px-4 py-4 pb-28">
 
       {/* KPI Cards — 2×2 grid */}
       <div>
-        <h2 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-3">
+        <h2 className="mb-3 font-brand text-[11px] font-bold uppercase tracking-[0.1em] text-market-lightMuted dark:text-market-muted">
           Podsumowanie
         </h2>
         <div className="grid grid-cols-2 gap-3">
@@ -111,6 +113,7 @@ export default function Statistics({ firestoreProducts, history, allTemplates, o
             emoji="🛒"
             value={stats.totalItems}
             label="Łącznie produktów kupionych"
+            tone="green"
           />
           <KpiCard
             emoji="📦"
@@ -121,14 +124,15 @@ export default function Statistics({ firestoreProducts, history, allTemplates, o
             emoji="🌟"
             value={stats.uniqueProducts}
             label="Unikalnych produktów"
+            tone="green"
           />
         </div>
       </div>
 
       {/* Top products — horizontal bar chart */}
       {stats.topProducts.length > 0 && (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-800">
-          <h2 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-4">
+        <div className="rounded-2xl border border-market-lightBorder bg-market-lightSurface p-4 shadow-sm dark:border-white/[0.06] dark:bg-market-surface">
+          <h2 className="mb-4 font-brand text-[11px] font-bold uppercase tracking-[0.1em] text-market-lightMuted dark:text-market-muted">
             Top produkty
           </h2>
           <ResponsiveContainer width="100%" height={stats.topProducts.length * 36 + 8}>
@@ -139,8 +143,8 @@ export default function Statistics({ firestoreProducts, history, allTemplates, o
             >
               <defs>
                 <linearGradient id="barGradient" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#6366f1" />
-                  <stop offset="100%" stopColor="#8b5cf6" />
+                  <stop offset="0%" stopColor="#a98bf0" />
+                  <stop offset="100%" stopColor="#7fcb9e" />
                 </linearGradient>
               </defs>
               <XAxis type="number" hide />
@@ -148,12 +152,12 @@ export default function Statistics({ firestoreProducts, history, allTemplates, o
                 type="category"
                 dataKey="name"
                 width={110}
-                tick={{ fontSize: 12, fill: 'currentColor' }}
+                tick={{ fontSize: 12, fill: '#9aa79c', fontWeight: 600 }}
                 tickLine={false}
                 axisLine={false}
               />
-              <Tooltip content={<CustomBarTooltip />} cursor={{ fill: 'rgba(99,102,241,0.08)' }} />
-              <Bar dataKey="count" fill="url(#barGradient)" radius={[0, 6, 6, 0]} barSize={18} />
+              <Tooltip content={<CustomBarTooltip />} cursor={{ fill: 'rgba(127,203,158,0.08)' }} />
+              <Bar dataKey="count" fill="url(#barGradient)" radius={[0, 6, 6, 0]} barSize={13} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -161,8 +165,8 @@ export default function Statistics({ firestoreProducts, history, allTemplates, o
 
       {/* Category distribution — donut chart */}
       {stats.topCategories.length > 0 && (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-800">
-          <h2 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-4">
+        <div className="rounded-2xl border border-market-lightBorder bg-market-lightSurface p-4 shadow-sm dark:border-white/[0.06] dark:bg-market-surface">
+          <h2 className="mb-4 font-brand text-[11px] font-bold uppercase tracking-[0.1em] text-market-lightMuted dark:text-market-muted">
             Ulubione kategorie
           </h2>
           <ResponsiveContainer width="100%" height={240}>
@@ -193,12 +197,12 @@ export default function Statistics({ firestoreProducts, history, allTemplates, o
       )}
 
       {/* Top templates ranking — always visible */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-800">
-        <h2 className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-3">
+      <div className="rounded-2xl border border-market-lightBorder bg-market-lightSurface p-4 shadow-sm dark:border-white/[0.06] dark:bg-market-surface">
+        <h2 className="mb-3 font-brand text-[11px] font-bold uppercase tracking-[0.1em] text-market-lightMuted dark:text-market-muted">
           Ulubione szablony
         </h2>
         {stats.topTemplates.length === 0 ? (
-          <p className="text-sm text-slate-400 dark:text-slate-600 py-2">
+          <p className="py-2 text-sm text-market-lightMuted dark:text-market-muted">
             Użyj szablonu, żeby zobaczyć ranking ulubionych dań
           </p>
         ) : (
@@ -208,18 +212,18 @@ export default function Statistics({ firestoreProducts, history, allTemplates, o
               const pct = Math.round((t.count / maxCount) * 100)
               return (
                 <div key={t.name} className="flex items-center gap-3">
-                  <span className="text-xs font-bold text-slate-400 dark:text-slate-600 w-4 text-right flex-shrink-0">
+                  <span className="w-4 flex-shrink-0 text-right text-xs font-bold text-market-lightMuted dark:text-market-muted">
                     {i + 1}
                   </span>
                   <span className="text-base leading-none flex-shrink-0">{t.emoji}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm text-slate-700 dark:text-slate-300 truncate">{t.name}</span>
-                      <span className="text-xs text-slate-400 dark:text-slate-500 flex-shrink-0 ml-2">{t.count}×</span>
+                      <span className="truncate text-sm font-semibold text-market-lightText dark:text-market-text">{t.name}</span>
+                      <span className="ml-2 flex-shrink-0 text-xs font-semibold text-market-lightMuted dark:text-market-muted">{t.count}×</span>
                     </div>
-                    <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div className="h-1.5 overflow-hidden rounded-full bg-market-lightRaised dark:bg-market-raised">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500"
+                        className="h-full rounded-full bg-gradient-to-r from-fresh-violetLight to-fresh-greenStrong dark:from-fresh-violet dark:to-fresh-green"
                         style={{ width: `${pct}%` }}
                       />
                     </div>
@@ -236,9 +240,9 @@ export default function Statistics({ firestoreProducts, history, allTemplates, o
         <button
           onClick={handleReset}
           disabled={resetting}
-          className="w-full py-3 rounded-xl text-sm font-medium text-red-500 dark:text-red-400 border border-red-200 dark:border-red-900 hover:bg-red-50 dark:hover:bg-red-500/10 active:bg-red-100 dark:active:bg-red-500/20 transition-colors disabled:opacity-50"
+          className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-fresh-danger/30 text-sm font-bold text-fresh-danger transition-colors hover:bg-fresh-danger/10 focus:outline-none focus:ring-2 focus:ring-fresh-danger disabled:opacity-50"
         >
-          {resetting ? 'Resetowanie…' : '🔄 Resetuj statystyki'}
+          <RotateCcw size={17} /> {resetting ? 'Resetowanie…' : 'Resetuj statystyki'}
         </button>
       </div>
 

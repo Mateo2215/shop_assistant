@@ -79,3 +79,10 @@ Szczegóły: `docs/plans/weekly-meal-planning.md`.
 - [ ] Zachować `zakupowo-28267` jako rollback przez minimum 7 dni
 
 Szczegóły: `docs/plans/firebase-project-migration.md`.
+
+## Redesign „Świeży Targ” 🚧
+- [x] Dodać tokeny kolorów, fonty i `lucide-react`
+- [x] Odświeżyć header, bottom nav, motyw dark/light i sticky offsety
+- [x] Przestylować główną listę zakupów i widoki `Kategorie` / `Dni`
+- [x] Przestylować szablony, historię, statystyki, gazetkę i modal dni
+- [x] Zweryfikować build oraz podstawowe scenariusze mobile dark/light

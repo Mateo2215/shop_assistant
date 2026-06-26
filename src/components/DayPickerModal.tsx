@@ -1,5 +1,6 @@
 // Mobile-friendly weekday picker used by products, templates, and meal plans.
 import { useEffect, useState } from 'react'
+import { X } from 'lucide-react'
 import { WEEKDAYS, sortWeekdays } from '../data/weekdays'
 import type { Weekday } from '../types'
 
@@ -72,7 +73,7 @@ export default function DayPickerModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/50 p-0 sm:items-center sm:p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/55 p-0 sm:items-center sm:p-4"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
@@ -81,24 +82,24 @@ export default function DayPickerModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="day-picker-title"
-        className="w-full max-w-md rounded-t-3xl bg-white p-4 shadow-2xl dark:bg-slate-900 sm:rounded-3xl"
+        className="w-full max-w-md rounded-t-3xl border border-market-lightBorder bg-market-lightSurface p-4 shadow-2xl dark:border-white/[0.06] dark:bg-market-surface sm:rounded-3xl"
       >
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
-            <h2 id="day-picker-title" className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+            <h2 id="day-picker-title" className="font-brand text-lg font-bold text-market-lightText dark:text-market-text">
               {title}
             </h2>
             {description && (
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{description}</p>
+              <p className="mt-1 text-sm font-semibold text-market-lightMuted dark:text-market-muted">{description}</p>
             )}
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-2xl text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-market-lightMuted transition-colors hover:bg-market-lightRaised hover:text-market-lightText focus:outline-none focus:ring-2 focus:ring-fresh-violetLight dark:text-market-muted dark:hover:bg-market-raised dark:hover:text-market-text dark:focus:ring-fresh-green"
             aria-label="Zamknij"
           >
-            ×
+            <X size={18} />
           </button>
         </div>
 
@@ -115,10 +116,10 @@ export default function DayPickerModal({
                 onClick={() => toggleDay(day.id)}
                 disabled={(isLocked && !isAlsoManual) || saving}
                 aria-pressed={isSelected}
-                className={`min-h-12 rounded-xl border px-3 py-2 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                className={`min-h-12 rounded-xl border px-3 py-2 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-fresh-green ${
                   isSelected
-                    ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300'
-                    : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-indigo-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                    ? 'border-fresh-greenStrong bg-fresh-greenStrong/10 text-fresh-greenStrong dark:border-fresh-green dark:bg-fresh-green/15 dark:text-fresh-green'
+                    : 'border-market-lightInput bg-market-lightRaised text-market-lightText hover:border-fresh-violetLight dark:border-white/[0.08] dark:bg-market-elevated dark:text-market-text'
                 } ${isLocked && !isAlsoManual ? 'cursor-not-allowed opacity-65' : ''}`}
               >
                 <span className="block text-sm font-semibold">{day.label}</span>
@@ -138,7 +139,7 @@ export default function DayPickerModal({
               type="button"
               onClick={handleDelete}
               disabled={saving}
-              className="min-h-11 rounded-xl border border-red-200 px-4 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10"
+              className="min-h-11 rounded-xl border border-fresh-danger/30 px-4 text-sm font-bold text-fresh-danger transition-colors hover:bg-fresh-danger/10 focus:outline-none focus:ring-2 focus:ring-fresh-danger disabled:opacity-50"
             >
               {deleteLabel}
             </button>
@@ -147,7 +148,7 @@ export default function DayPickerModal({
             type="button"
             onClick={handleSave}
             disabled={saving || (!allowEmpty && selected.size === 0)}
-            className="min-h-11 flex-1 rounded-xl bg-indigo-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-40 dark:focus:ring-offset-slate-900"
+            className="min-h-11 flex-1 rounded-xl bg-gradient-to-br from-fresh-violetLight to-fresh-greenStrong px-4 text-sm font-bold text-white transition-colors hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-fresh-greenStrong focus:ring-offset-2 focus:ring-offset-market-lightSurface disabled:opacity-40 dark:from-fresh-violet dark:to-fresh-green dark:focus:ring-offset-market-surface"
           >
             {saving ? 'Zapisywanie...' : saveLabel}
           </button>

@@ -36,6 +36,13 @@
 - Build i izolowany test mobilnego UI zakończone powodzeniem
 - Pozostało: test zapisu/synchronizacji Firestore na 2 urządzeniach oraz deploy
 
+## Redesign — „Świeży Targ” ✅
+- Wdrożono pełny redesign prezentacyjny według `design/dashboard/README.md`.
+- Dodano fonty Quicksand / Nunito Sans, ciepłą paletę dark/light oraz ikony `lucide-react`.
+- Odświeżono header, bottom nav, dodawanie produktu, sugestie, widoki `Kategorie` / `Dni`, produkt, kupione, szablony, edytor, historię, statystyki, gazetkę i modal dni.
+- Logika hooków, Firestore, modele danych i zachowanie planów posiłków pozostały bez zmian.
+- Weryfikacja: `npm run build` przechodzi; local smoke test w Chrome na viewportach 390×844 i 360×640 potwierdził header 72px, bottom nav 67px, brak zbyt małych przycisków i działające zakładki.
+
 ## Komendy
 ```bash
 npm run dev          # development
@@ -51,3 +58,4 @@ npm run generate-icons  # regeneruj ikony z public/icon.svg
 - Recharts 2.x (bundled TS types)
 - Soft-delete domyślnych szablonów przez `{ deleted: true }` w Firestore
 - Ikony generowane przez `sharp` z SVG źródłowego (`public/icon.svg`)
+- Ikony UI redesignu przez `lucide-react`
