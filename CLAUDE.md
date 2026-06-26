@@ -4,7 +4,7 @@
 
 **Zakupowo** — wspólna lista zakupów dla pary. PWA (Progressive Web App), mobile-first, po polsku, z real-time synchronizacją.
 
-> **Status: dostarczony i w użyciu.** Aplikacja jest live na https://zakupowo-28267.web.app i używana na co dzień. Tygodniowe planowanie posiłków jest zaimplementowane lokalnie i oczekuje na test Firestore oraz osobny deploy. Aktualizacje: `npm run deploy`.
+> **Status: dostarczony i w użyciu.** Aplikacja jest live na https://zakupowo-v2.web.app i używana na co dzień. Tygodniowe planowanie posiłków, redesign „Świeży Targ" oraz logo PWA „Markiza targowa" są wdrożone produkcyjnie i zweryfikowane na urządzeniu. Deploy jest automatyczny przez GitHub Actions po pushu do `main`.
 
 ### Użytkownicy
 
@@ -319,7 +319,7 @@ Appka jest prywatna dla 2 osób — najprostsze podejście:
 
 ## Plan implementacji (fazy) — ✅ UKOŃCZONE
 
-> Wszystkie 3 fazy zamknięte, aplikacja **live i w użyciu**: https://zakupowo-28267.web.app
+> Wszystkie 3 fazy zamknięte, aplikacja **live i w użyciu**: https://zakupowo-v2.web.app
 > Szczegółowy stan końcowy: [`PROGRESS.md`](PROGRESS.md) i [`tasks/todo.md`](tasks/todo.md). Poniższy plan zachowany jako zapis pierwotnego zakresu.
 
 ### Faza 1 — Fundament
@@ -368,9 +368,9 @@ Na koniec każdej sesji zaktualizuj `PROGRESS.md`:
 
 ## Kontekst zewnętrzny
 
-- **Deploy URL (live):** https://zakupowo-28267.web.app
-- **Firebase project ID:** `zakupowo-28267` (zob. `.firebaserc`); konsola: https://console.firebase.google.com/project/zakupowo-28267
+- **Deploy URL (live):** https://zakupowo-v2.web.app
+- **Firebase project ID:** `zakupowo-v2` (zob. `.firebaserc`); konsola: https://console.firebase.google.com/project/zakupowo-v2
 - **Household ID:** `nasze-zakupy` (zmienna `VITE_HOUSEHOLD_ID` w `.env`)
-- **Repo (git remote):** https://github.com/Mateo2215/Zakupowo
+- **Repo (git remote `origin`):** https://github.com/Mateo2215/shop_assistant (prywatne); poprzednie `legacy`: https://github.com/Mateo2215/Zakupowo
 - **Kaufland Polska gazetka:** https://www.kaufland.pl/oferta/gazetka.html
 - Sekrety (klucze Firebase) wyłącznie w `.env` — nie commitować.

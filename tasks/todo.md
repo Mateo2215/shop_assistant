@@ -78,7 +78,7 @@ Szczegóły: `docs/plans/weekly-meal-planning.md`.
 - [x] Przełączyć konfigurację aplikacji na `zakupowo-v2`
 - [x] Wykonać kontrolowany ręczny deploy do `zakupowo-v2`
 - [x] Skonfigurować GitHub Actions dla kolejnych deployów
-- [ ] Zachować `zakupowo-28267` jako rollback przez minimum 7 dni
+- [x] Wygaszono `zakupowo-28267` — projekt usunięty w konsoli 2026-06-26 (30 dni grace Firebase na odzyskanie do ~2026-07-26)
 
 Szczegóły: `docs/plans/firebase-project-migration.md`.
 
@@ -89,4 +89,4 @@ Szczegóły: `docs/plans/firebase-project-migration.md`.
 - [x] Przestylować szablony, historię, statystyki, gazetkę i modal dni
 - [x] Zweryfikować build oraz podstawowe scenariusze mobile dark/light
 - [x] Podłączyć logo z `design/logo` jako favicon, manifest icons, maskable icon i `apple-touch-icon`
-- [ ] P1: Po deployu dodać PWA ponownie na telefonie i potwierdzić, że ekran główny pokazuje nowe logo (warunek: deploy logo wykonany 2026-06-26)
+- [x] P1: Po deployu dodać PWA ponownie na telefonie i potwierdzić, że ekran główny pokazuje nowe logo — zweryfikowane na urządzeniu 2026-06-26

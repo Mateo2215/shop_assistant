@@ -2,7 +2,7 @@
 
 Wspólna lista zakupów dla dwojga. Działa na telefonie jak normalna aplikacja — bez App Store, bez Google Play. Zmiany jednej osoby pojawiają się u drugiej natychmiast.
 
-**Adres aplikacji:** https://zakupowo-28267.web.app
+**Adres aplikacji:** https://zakupowo-v2.web.app
 
 ---
 
@@ -59,13 +59,13 @@ Wspólna lista zakupów dla dwojga. Działa na telefonie jak normalna aplikacja 
 Aplikacja działa w przeglądarce, ale można ją też zainstalować jak normalną apkę — wtedy działa bez paska przeglądarki i ma ikonę na ekranie głównym.
 
 **Na iPhonie:**
-1. Otwórz Safari i wejdź na https://zakupowo-28267.web.app
+1. Otwórz Safari i wejdź na https://zakupowo-v2.web.app
 2. Naciśnij ikonę udostępniania (kwadrat ze strzałką ↑) na dole ekranu
 3. Wybierz "Dodaj do ekranu głównego"
 4. Zatwierdź — ikona pojawi się jak normalna aplikacja
 
 **Na Androidzie:**
-1. Otwórz Chrome i wejdź na https://zakupowo-28267.web.app
+1. Otwórz Chrome i wejdź na https://zakupowo-v2.web.app
 2. Chrome wyświetli baner "Zainstaluj aplikację" — kliknij
 3. Albo: menu (trzy kropki w prawym górnym rogu) → "Dodaj do ekranu głównego"
 
