@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { RotateCcw } from 'lucide-react'
+import { ExternalLink, Newspaper, RotateCcw } from 'lucide-react'
 import {
   BarChart,
   Bar,
@@ -84,12 +84,26 @@ export default function Statistics({ firestoreProducts, history, allTemplates, o
     }
   }
 
+  const gazetkaLink = (
+    <a
+      href="https://www.kaufland.pl/oferta/gazetka.html"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-market-lightBorder text-sm font-bold text-market-lightMuted transition-colors hover:text-market-lightText focus:outline-none focus:ring-2 focus:ring-fresh-greenStrong dark:border-white/[0.06] dark:text-market-muted dark:hover:text-market-text"
+    >
+      <Newspaper size={16} aria-hidden="true" /> Gazetka Kaufland <ExternalLink size={14} aria-hidden="true" />
+    </a>
+  )
+
   if (!stats.hasData) {
     return (
-      <div className="flex flex-col items-center justify-center px-6 py-20 text-center text-market-lightMuted dark:text-market-muted">
-        <div className="text-5xl mb-3">📊</div>
-        <p className="font-brand text-lg font-bold text-market-lightText dark:text-market-text">Brak danych</p>
-        <p className="text-sm mt-1">Statystyki pojawią się po pierwszych zakupach</p>
+      <div className="flex flex-col px-6 py-20 pb-28">
+        <div className="flex flex-col items-center justify-center text-center text-market-lightMuted dark:text-market-muted">
+          <div className="text-5xl mb-3">📊</div>
+          <p className="font-brand text-lg font-bold text-market-lightText dark:text-market-text">Brak danych</p>
+          <p className="text-sm mt-1">Statystyki pojawią się po pierwszych zakupach</p>
+        </div>
+        <div className="mt-10">{gazetkaLink}</div>
       </div>
     )
   }
@@ -245,6 +259,9 @@ export default function Statistics({ firestoreProducts, history, allTemplates, o
           <RotateCcw size={17} /> {resetting ? 'Resetowanie…' : 'Resetuj statystyki'}
         </button>
       </div>
+
+      {/* Kaufland gazetka — link wychodzący na dole statystyk */}
+      <div>{gazetkaLink}</div>
 
     </div>
   )

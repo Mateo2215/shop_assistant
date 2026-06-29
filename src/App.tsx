@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { ExternalLink, Newspaper } from 'lucide-react'
 import type {
   ActiveTab,
   HistoryEntry,
@@ -164,18 +163,6 @@ export default function App() {
             onDeleteProduct={deleteProduct}
           />
           <Suggestions suggestions={suggestions} onAdd={handleAddItem} onDismiss={dismissSuggestion} />
-          <div className="flex justify-end px-4 pt-2">
-            <a
-              href="https://www.kaufland.pl/oferta/gazetka.html"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-market-lightRaised px-3 text-[12.5px] font-bold text-market-lightMuted transition-colors hover:text-market-lightText focus:outline-none focus:ring-2 focus:ring-fresh-greenStrong dark:bg-market-raised dark:text-market-muted dark:hover:text-market-text"
-            >
-              <Newspaper size={14} aria-hidden="true" />
-              Gazetka Kaufland
-              <ExternalLink size={13} aria-hidden="true" />
-            </a>
-          </div>
           <ShoppingList
             items={items}
             loading={loading}
