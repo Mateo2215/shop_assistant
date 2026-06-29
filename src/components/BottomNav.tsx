@@ -1,4 +1,4 @@
-import { BarChart3, BookOpen, ClipboardList, Clock, Newspaper } from 'lucide-react'
+import { BarChart3, BookOpen, ClipboardList, Clock, UtensilsCrossed } from 'lucide-react'
 import type { ActiveTab } from '../types'
 
 interface BottomNavProps {
@@ -11,7 +11,7 @@ const TABS: { id: ActiveTab; label: string; icon: typeof ClipboardList }[] = [
   { id: 'templates',   label: 'Szablony',   icon: BookOpen },
   { id: 'historia',    label: 'Historia',   icon: Clock },
   { id: 'statystyki',  label: 'Statystyki', icon: BarChart3 },
-  { id: 'gazetka',     label: 'Gazetka',    icon: Newspaper },
+  { id: 'jadlospis',   label: 'Jadłospis',  icon: UtensilsCrossed },
 ]
 
 export default function BottomNav({ active, onChange }: BottomNavProps) {

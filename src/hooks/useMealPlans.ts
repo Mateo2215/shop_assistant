@@ -1,8 +1,9 @@
 // Manages meal plans and atomic updates shared with shopping-list items.
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   arrayUnion,
   collection,
+  deleteDoc,
   doc,
   onSnapshot,
   serverTimestamp,
@@ -24,6 +25,15 @@ import type {
 const shoppingListPath = ['households', HOUSEHOLD_ID, 'shoppingList'] as const
 const mealPlansPath = ['households', HOUSEHOLD_ID, 'mealPlans'] as const
 
+// A meal plan stays on the menu for this long after its last edit; older plans
+// are auto-expired client-side so forgotten meals never pile up (no server/cron).
+const MEAL_PLAN_TTL_DAYS = 7
+const MEAL_PLAN_TTL_MS = MEAL_PLAN_TTL_DAYS * 24 * 60 * 60 * 1000
+
+function isMealPlanActive(plan: MealPlan, now: number): boolean {
+  return now - plan.updatedAt.getTime() < MEAL_PLAN_TTL_MS
+}
+
 function normalizeName(name: string): string {
   return name.trim().toLocaleLowerCase('pl')
 }
@@ -41,31 +51,6 @@ function docToMealPlan(id: string, data: Record<string, unknown>): MealPlan {
     items: Array.isArray(data.items) ? (data.items as MealPlanItem[]) : [],
     createdAt: timestamp?.toDate() ?? new Date(),
     updatedAt: updatedTimestamp?.toDate() ?? new Date(),
-  }
-}
-
-function shouldDeleteOrphan(item: ShoppingItem, remainingPlanIds: string[]): boolean {
-  return !item.isStandalone && item.manualDays.length === 0 && remainingPlanIds.length === 0
-}
-
-function removeItemsFromPlans(
-  batch: WriteBatch,
-  removedItemIds: Set<string>,
-  mealPlans: MealPlan[]
-) {
-  for (const plan of mealPlans) {
-    if (!plan.items.some((item) => removedItemIds.has(item.shoppingItemId))) continue
-
-    const remainingItems = plan.items.filter(
-      (item) => !removedItemIds.has(item.shoppingItemId)
-    )
-    const planRef = doc(db, ...mealPlansPath, plan.id)
-
-    if (remainingItems.length === 0) {
-      batch.delete(planRef)
-    } else {
-      batch.update(planRef, { items: remainingItems, updatedAt: serverTimestamp() })
-    }
   }
 }
 
@@ -123,19 +108,31 @@ export function useMealPlans() {
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  // Ids we already issued a delete for, so we don't re-fire on every snapshot.
+  const expiredCleanupRef = useRef<Set<string>>(new Set())
 
   useEffect(() => {
     const ref = collection(db, ...mealPlansPath)
     const unsubscribe = onSnapshot(
       ref,
       (snapshot) => {
-        setMealPlans(
-          snapshot.docs.map((entry) =>
-            docToMealPlan(entry.id, entry.data() as Record<string, unknown>)
-          )
+        const plans = snapshot.docs.map((entry) =>
+          docToMealPlan(entry.id, entry.data() as Record<string, unknown>)
         )
+        setMealPlans(plans)
         setLoading(false)
         setError(null)
+
+        // Best-effort lazy cleanup of expired plans (no server/cron). Idempotent.
+        const now = Date.now()
+        for (const plan of plans) {
+          if (isMealPlanActive(plan, now)) continue
+          if (expiredCleanupRef.current.has(plan.id)) continue
+          expiredCleanupRef.current.add(plan.id)
+          deleteDoc(doc(db, ...mealPlansPath, plan.id)).catch((cleanupError) =>
+            console.error('Expired meal plan cleanup failed:', cleanupError)
+          )
+        }
       },
       (snapshotError) => {
         console.error('Meal plans Firestore error:', snapshotError)
@@ -146,6 +143,13 @@ export function useMealPlans() {
 
     return unsubscribe
   }, [])
+
+  // Only non-expired plans are shown on the menu; expired ones are filtered out
+  // immediately (the lazy delete above removes them from Firestore in the background).
+  const activeMealPlans = useMemo(() => {
+    const now = Date.now()
+    return mealPlans.filter((plan) => isMealPlanActive(plan, now))
+  }, [mealPlans])
 
   async function planTemplate(
     template: Template,
@@ -196,6 +200,8 @@ export function useMealPlans() {
     await batch.commit()
   }
 
+  // Explicit "Usuń plan" from the day editor: drop the meal and the ingredients it
+  // brought that nothing else keeps on the list (user-added standalone items stay).
   async function removeMealPlan(plan: MealPlan, currentItems: ShoppingItem[]) {
     const batch = writeBatch(db)
     const linkedItems = currentItems.filter((item) => item.mealPlanIds.includes(plan.id))
@@ -204,7 +210,7 @@ export function useMealPlans() {
       const remainingPlanIds = item.mealPlanIds.filter((id) => id !== plan.id)
       const itemRef = doc(db, ...shoppingListPath, item.id)
 
-      if (shouldDeleteOrphan(item, remainingPlanIds)) {
+      if (!item.isStandalone && remainingPlanIds.length === 0) {
         batch.delete(itemRef)
       } else {
         batch.update(itemRef, {
@@ -218,34 +224,37 @@ export function useMealPlans() {
     await batch.commit()
   }
 
+  // "Ugotowane": the meal leaves the menu. Shopping items are independent now,
+  // so they are left untouched (already bought / cleared on their own).
+  async function markCooked(plan: MealPlan) {
+    await deleteDoc(doc(db, ...mealPlansPath, plan.id))
+  }
+
+  // Clearing the shopping list no longer touches meal plans — the menu survives
+  // shopping. Plans keep their own item snapshot for display and status.
   async function removeShoppingItem(item: ShoppingItem) {
-    const batch = writeBatch(db)
-    removeItemsFromPlans(batch, new Set([item.id]), mealPlans)
-    batch.delete(doc(db, ...shoppingListPath, item.id))
-    await batch.commit()
+    await deleteDoc(doc(db, ...shoppingListPath, item.id))
   }
 
   async function removeCheckedItems(items: ShoppingItem[]) {
     if (items.length === 0) return
 
     const batch = writeBatch(db)
-    const itemIds = new Set(items.map((item) => item.id))
-    removeItemsFromPlans(batch, itemIds, mealPlans)
-
     for (const item of items) {
       batch.delete(doc(db, ...shoppingListPath, item.id))
     }
-
     await batch.commit()
   }
 
   return {
     mealPlans,
+    activeMealPlans,
     loading,
     error,
     planTemplate,
     updateMealPlanDays,
     removeMealPlan,
+    markCooked,
     removeShoppingItem,
     removeCheckedItems,
   }

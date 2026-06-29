@@ -106,5 +106,4 @@ export interface HistoryEntry {
   items: HistoryItem[]
 }
 
-export type ActiveTab = 'list' | 'templates' | 'historia' | 'statystyki' | 'gazetka'
-export type ShoppingListView = 'categories' | 'days'
+export type ActiveTab = 'list' | 'templates' | 'historia' | 'statystyki' | 'jadlospis'

@@ -1,39 +1,22 @@
-import type { MealPlan, ShoppingItem, ShoppingListView } from '../types'
+import type { ShoppingItem } from '../types'
 import { AlertTriangle, ShoppingCart } from 'lucide-react'
-import { getEffectiveDays } from '../data/weekdays'
 import CategoryListView from './CategoryListView'
-import DayListView from './DayListView'
-import ListViewToggle from './ListViewToggle'
 import ProductItem from './ProductItem'
 
 interface ShoppingListProps {
   items: ShoppingItem[]
-  mealPlans: MealPlan[]
   loading: boolean
   error: string | null
-  mealPlansLoading: boolean
-  mealPlansError: string | null
-  view: ShoppingListView
-  onViewChange: (view: ShoppingListView) => void
   onToggle: (id: string, checked: boolean) => void
   onRemove: (item: ShoppingItem) => void
-  onEditDays: (item: ShoppingItem) => void
-  onEditMealPlan: (plan: MealPlan) => void
 }
 
 export default function ShoppingList({
   items,
-  mealPlans,
   loading,
   error,
-  mealPlansLoading,
-  mealPlansError,
-  view,
-  onViewChange,
   onToggle,
   onRemove,
-  onEditDays,
-  onEditMealPlan,
 }: ShoppingListProps) {
   if (loading) {
     return (
@@ -63,24 +46,6 @@ export default function ShoppingList({
 
   return (
     <div className="pb-28">
-      <ListViewToggle
-        value={view}
-        onChange={onViewChange}
-        daysDisabled={Boolean(mealPlansError)}
-      />
-
-      {mealPlansError && (
-        <div className="border-b border-amber-300 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-300">
-          {mealPlansError} Widok kategorii nadal działa.
-        </div>
-      )}
-
-      {view === 'days' && mealPlansLoading && (
-        <div className="px-4 py-4 text-center text-sm text-market-lightMuted dark:text-market-muted">
-          Ładowanie planów posiłków...
-        </div>
-      )}
-
       {unchecked.length === 0 && checked.length === 0 ? (
         <div className="flex flex-col items-center justify-center px-6 py-20 text-center text-market-lightMuted dark:text-market-muted">
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-fresh-greenStrong/10 text-fresh-greenStrong dark:bg-fresh-green/10 dark:text-fresh-green">
@@ -89,24 +54,9 @@ export default function ShoppingList({
           <p className="font-brand text-lg font-bold text-market-lightText dark:text-market-text">Lista jest pusta</p>
           <p className="mt-1 text-sm">Dodaj pierwszy produkt powyżej</p>
         </div>
-      ) : view === 'categories' ? (
-        <CategoryListView
-          items={unchecked}
-          mealPlans={mealPlans}
-          onToggle={onToggle}
-          onRemove={onRemove}
-          onEditDays={onEditDays}
-        />
-      ) : !mealPlansLoading && !mealPlansError ? (
-        <DayListView
-          items={unchecked}
-          mealPlans={mealPlans}
-          onToggle={onToggle}
-          onRemove={onRemove}
-          onEditDays={onEditDays}
-          onEditMealPlan={onEditMealPlan}
-        />
-      ) : null}
+      ) : (
+        <CategoryListView items={unchecked} onToggle={onToggle} onRemove={onRemove} />
+      )}
 
       {checked.length > 0 && (
         <div className="mt-3">
@@ -117,14 +67,7 @@ export default function ShoppingList({
           </div>
           <div className="bg-market-lightSurface dark:bg-market-bg">
             {checked.map((item) => (
-              <ProductItem
-                key={item.id}
-                item={item}
-                days={getEffectiveDays(item, mealPlans)}
-                onToggle={onToggle}
-                onRemove={onRemove}
-                onEditDays={onEditDays}
-              />
+              <ProductItem key={item.id} item={item} onToggle={onToggle} onRemove={onRemove} />
             ))}
           </div>
         </div>

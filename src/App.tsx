@@ -1,11 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { ExternalLink, Newspaper } from 'lucide-react'
 import type {
   ActiveTab,
   HistoryEntry,
   MealPlan,
   ShoppingItem,
-  ShoppingListView,
   Template,
   Weekday,
 } from './types'
@@ -16,7 +15,6 @@ import { useHistory } from './hooks/useHistory'
 import { useSuggestions } from './hooks/useSuggestions'
 import { useTheme } from './hooks/useTheme'
 import { useMealPlans } from './hooks/useMealPlans'
-import { getInheritedDays } from './data/weekdays'
 import Header from './components/Header'
 import AddProduct from './components/AddProduct'
 import ShoppingList from './components/ShoppingList'
@@ -26,14 +24,10 @@ import History from './components/History'
 import Statistics from './components/Statistics'
 import BottomNav from './components/BottomNav'
 import DayPickerModal from './components/DayPickerModal'
+import Jadlospis from './components/Jadlospis'
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('list')
-  const [listView, setListView] = useState<ShoppingListView>(() => {
-    const saved = localStorage.getItem('shopping-list-view')
-    return saved === 'days' ? 'days' : 'categories'
-  })
-  const [editingDaysItem, setEditingDaysItem] = useState<ShoppingItem | null>(null)
   const [editingMealPlan, setEditingMealPlan] = useState<MealPlan | null>(null)
   const { isDark, toggleTheme } = useTheme()
 
@@ -43,7 +37,6 @@ export default function App() {
     error,
     addItem,
     toggleItem,
-    updateManualDays,
     markStandalone,
   } = useShoppingList()
   const { firestoreProducts, searchProducts, ensureProduct, recordPurchase, deleteProduct, dismissSuggestion, resetAllProducts } =
@@ -51,26 +44,17 @@ export default function App() {
   const { allTemplates, createTemplate, updateTemplate, deleteTemplate, recordTemplateUse, resetTemplateUseCounts } = useTemplates()
   const { history, saveToHistory, deleteEntry, clearHistory } = useHistory()
   const {
-    mealPlans,
-    loading: mealPlansLoading,
-    error: mealPlansError,
+    activeMealPlans,
     planTemplate,
     updateMealPlanDays,
     removeMealPlan,
+    markCooked,
     removeShoppingItem,
     removeCheckedItems,
   } = useMealPlans()
   const suggestions = useSuggestions(firestoreProducts, items)
 
   const checkedCount = items.filter((i) => i.checked).length
-
-  useEffect(() => {
-    localStorage.setItem('shopping-list-view', listView)
-  }, [listView])
-
-  useEffect(() => {
-    if (mealPlansError && listView === 'days') setListView('categories')
-  }, [mealPlansError, listView])
 
   // Add to list + save to products DB so it persists in autocomplete
   async function handleAddItem(
@@ -122,28 +106,17 @@ export default function App() {
       template.items.map((item) => ensureProduct(item.name, item.category))
     ).catch(console.error)
     recordTemplateUse(template.id).catch(console.error)
-    setActiveTab('list')
-    setListView('days')
+    setActiveTab('jadlospis')
   }
 
+  // Meal plans are independent of the list now — removing an item only takes it
+  // off the shopping list; the planned meal keeps its own snapshot.
   async function handleRemoveItem(item: ShoppingItem) {
-    if (item.mealPlanIds.length > 0) {
-      const planNames = mealPlans
-        .filter((plan) => item.mealPlanIds.includes(plan.id))
-        .map((plan) => plan.name)
-        .join(', ')
-      const confirmed = confirm(
-        `Produkt „${item.name}” należy do planu: ${planNames || 'posiłek'}. Usunąć go również z planu?`
-      )
-      if (!confirmed) return
-    }
-
     await removeShoppingItem(item)
   }
 
-  async function handleSaveManualDays(item: ShoppingItem, days: Weekday[]) {
-    await updateManualDays(item.id, days)
-    setEditingDaysItem(null)
+  async function handleCook(plan: MealPlan) {
+    await markCooked(plan)
   }
 
   async function handleSaveMealPlanDays(plan: MealPlan, days: Weekday[]) {
@@ -191,19 +164,24 @@ export default function App() {
             onDeleteProduct={deleteProduct}
           />
           <Suggestions suggestions={suggestions} onAdd={handleAddItem} onDismiss={dismissSuggestion} />
+          <div className="flex justify-end px-4 pt-2">
+            <a
+              href="https://www.kaufland.pl/oferta/gazetka.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-market-lightRaised px-3 text-[12.5px] font-bold text-market-lightMuted transition-colors hover:text-market-lightText focus:outline-none focus:ring-2 focus:ring-fresh-greenStrong dark:bg-market-raised dark:text-market-muted dark:hover:text-market-text"
+            >
+              <Newspaper size={14} aria-hidden="true" />
+              Gazetka Kaufland
+              <ExternalLink size={13} aria-hidden="true" />
+            </a>
+          </div>
           <ShoppingList
             items={items}
-            mealPlans={mealPlans}
             loading={loading}
             error={error}
-            mealPlansLoading={mealPlansLoading}
-            mealPlansError={mealPlansError}
-            view={listView}
-            onViewChange={setListView}
             onToggle={handleToggle}
             onRemove={handleRemoveItem}
-            onEditDays={setEditingDaysItem}
-            onEditMealPlan={setEditingMealPlan}
           />
         </>
       )}
@@ -211,7 +189,7 @@ export default function App() {
       {activeTab === 'templates' && (
         <Templates
           templates={allTemplates}
-          mealPlans={mealPlans}
+          mealPlans={activeMealPlans}
           onAddFromTemplate={handleAddFromTemplate}
           onPlanTemplate={handlePlanTemplate}
           onCreateTemplate={createTemplate}
@@ -237,43 +215,16 @@ export default function App() {
         />
       )}
 
-      {activeTab === 'gazetka' && (
-        <div className="flex flex-1 flex-col items-center justify-center px-6 py-20 text-center">
-          <div className="mb-5 flex h-[84px] w-[84px] items-center justify-center rounded-[22px] bg-fresh-greenStrong/10 text-fresh-greenStrong dark:bg-fresh-green/10 dark:text-fresh-green">
-            <Newspaper size={40} strokeWidth={1.7} />
-          </div>
-          <div className="text-center">
-            <p className="font-brand text-xl font-bold text-market-lightText dark:text-market-text">Gazetka Kaufland</p>
-            <p className="mt-1 text-sm text-market-lightMuted dark:text-market-muted">Aktualne promocje i oferty</p>
-          </div>
-          <a
-            href="https://www.kaufland.pl/oferta/gazetka.html"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-6 inline-flex min-h-12 items-center justify-center gap-2 rounded-[14px] bg-gradient-to-br from-fresh-violetLight to-fresh-greenStrong px-7 text-[15px] font-bold text-white shadow-[0_6px_16px_rgba(78,184,127,0.28)] transition-transform hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-fresh-greenStrong dark:from-fresh-violet dark:to-fresh-green dark:shadow-[0_6px_16px_rgba(124,180,140,0.30)]"
-          >
-            Otwórz gazetkę <ExternalLink size={17} />
-          </a>
-        </div>
+      {activeTab === 'jadlospis' && (
+        <Jadlospis
+          mealPlans={activeMealPlans}
+          items={items}
+          onCook={handleCook}
+          onEditMealPlan={setEditingMealPlan}
+        />
       )}
 
       <BottomNav active={activeTab} onChange={setActiveTab} />
-
-      {editingDaysItem && (
-        <DayPickerModal
-          key={editingDaysItem.id}
-          title={`Dni: ${editingDaysItem.name}`}
-          description={
-            editingDaysItem.mealPlanIds.length > 0
-              ? 'Dni z planów posiłków są zablokowane. Pozostałe możesz ustawić ręcznie.'
-              : 'Wybierz dowolne dni lub zostaw produkt bez dnia.'
-          }
-          selectedDays={editingDaysItem.manualDays}
-          lockedDays={getInheritedDays(editingDaysItem, mealPlans)}
-          onSave={(days) => handleSaveManualDays(editingDaysItem, days)}
-          onClose={() => setEditingDaysItem(null)}
-        />
-      )}
 
       {editingMealPlan && (
         <DayPickerModal

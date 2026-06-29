@@ -1,5 +1,5 @@
 // Shared weekday metadata and helpers for shopping items and meal plans.
-import type { MealPlan, ShoppingItem, Weekday } from '../types'
+import type { Weekday } from '../types'
 
 export interface WeekdayOption {
   id: Weekday
@@ -35,17 +35,4 @@ export function sortWeekdays(days: Iterable<Weekday>): Weekday[] {
 
 export function getWeekdayShortLabel(day: Weekday): string {
   return WEEKDAYS.find((option) => option.id === day)?.shortLabel ?? day
-}
-
-export function getInheritedDays(item: ShoppingItem, mealPlans: MealPlan[]): Weekday[] {
-  const planIds = new Set(item.mealPlanIds)
-  return sortWeekdays(
-    mealPlans
-      .filter((plan) => planIds.has(plan.id))
-      .flatMap((plan) => plan.days)
-  )
-}
-
-export function getEffectiveDays(item: ShoppingItem, mealPlans: MealPlan[]): Weekday[] {
-  return sortWeekdays([...item.manualDays, ...getInheritedDays(item, mealPlans)])
 }

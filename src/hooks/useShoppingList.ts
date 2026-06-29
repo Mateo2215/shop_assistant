@@ -12,7 +12,7 @@ import {
 } from 'firebase/firestore'
 import { db, HOUSEHOLD_ID } from '../firebase'
 import { parseWeekdays } from '../data/weekdays'
-import type { ShoppingItem, CategoryId, Weekday } from '../types'
+import type { ShoppingItem, CategoryId } from '../types'
 
 function docToItem(id: string, data: Record<string, unknown>): ShoppingItem {
   return {
@@ -82,11 +82,6 @@ export function useShoppingList() {
     await updateDoc(itemRef, { checked, updatedAt: serverTimestamp() })
   }
 
-  async function updateManualDays(id: string, manualDays: Weekday[]) {
-    const itemRef = doc(db, 'households', HOUSEHOLD_ID, 'shoppingList', id)
-    await updateDoc(itemRef, { manualDays, updatedAt: serverTimestamp() })
-  }
-
   async function markStandalone(id: string) {
     const itemRef = doc(db, 'households', HOUSEHOLD_ID, 'shoppingList', id)
     await updateDoc(itemRef, { isStandalone: true, updatedAt: serverTimestamp() })
@@ -98,7 +93,6 @@ export function useShoppingList() {
     error,
     addItem,
     toggleItem,
-    updateManualDays,
     markStandalone,
   }
 }

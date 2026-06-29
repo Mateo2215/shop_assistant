@@ -1,24 +1,17 @@
-import { CalendarDays, Check, X } from 'lucide-react'
-import type { ShoppingItem, Weekday } from '../types'
+import { Check, X } from 'lucide-react'
+import type { ShoppingItem } from '../types'
 import { getCategory } from '../data/categories'
-import { getWeekdayShortLabel } from '../data/weekdays'
 
 interface ProductItemProps {
   item: ShoppingItem
-  days: Weekday[]
-  showDayTags?: boolean
   onToggle: (id: string, checked: boolean) => void
   onRemove: (item: ShoppingItem) => void
-  onEditDays: (item: ShoppingItem) => void
 }
 
 export default function ProductItem({
   item,
-  days,
-  showDayTags = true,
   onToggle,
   onRemove,
-  onEditDays,
 }: ProductItemProps) {
   const category = getCategory(item.category)
 
@@ -58,33 +51,11 @@ export default function ProductItem({
             </span>
           )}
         </p>
-        {showDayTags && days.length > 0 && (
-          <div className="mt-1 flex flex-wrap gap-1">
-            {days.map((day) => (
-              <span
-                key={day}
-                className="rounded-md bg-market-lightRaised px-2 py-0.5 text-[11.5px] font-semibold text-market-lightMuted dark:bg-white/[0.06] dark:text-market-muted"
-              >
-                {getWeekdayShortLabel(day)}
-              </span>
-            ))}
-          </div>
-        )}
       </div>
 
       <span className="text-lg flex-shrink-0" title={category.name}>
         {category.emoji}
       </span>
-
-      <button
-        type="button"
-        onClick={() => onEditDays(item)}
-        className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-fresh-violetLight transition-colors hover:bg-fresh-violetLight/10 focus:outline-none focus:ring-2 focus:ring-fresh-violetLight dark:text-fresh-blue dark:hover:bg-fresh-blue/10"
-        aria-label={`Ustaw dni dla produktu ${item.name}`}
-        title="Ustaw dni"
-      >
-        <CalendarDays size={18} strokeWidth={2} />
-      </button>
 
       <button
         type="button"

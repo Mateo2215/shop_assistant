@@ -1,23 +1,18 @@
 // Renders unchecked shopping items grouped by store category.
-import type { MealPlan, ShoppingItem, CategoryId } from '../types'
+import type { ShoppingItem, CategoryId } from '../types'
 import { CATEGORIES, getCategory } from '../data/categories'
-import { getEffectiveDays } from '../data/weekdays'
 import ProductItem from './ProductItem'
 
 interface CategoryListViewProps {
   items: ShoppingItem[]
-  mealPlans: MealPlan[]
   onToggle: (id: string, checked: boolean) => void
   onRemove: (item: ShoppingItem) => void
-  onEditDays: (item: ShoppingItem) => void
 }
 
 export default function CategoryListView({
   items,
-  mealPlans,
   onToggle,
   onRemove,
-  onEditDays,
 }: CategoryListViewProps) {
   const grouped = CATEGORIES.reduce<Partial<Record<CategoryId, ShoppingItem[]>>>(
     (groups, category) => {
@@ -53,10 +48,8 @@ export default function CategoryListView({
                   <ProductItem
                     key={item.id}
                     item={item}
-                    days={getEffectiveDays(item, mealPlans)}
                     onToggle={onToggle}
                     onRemove={onRemove}
-                    onEditDays={onEditDays}
                   />
                 ))}
               </div>
