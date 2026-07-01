@@ -4,6 +4,7 @@ import type {
   HistoryEntry,
   MealPlan,
   ShoppingItem,
+  ShoppingListView,
   Template,
   Weekday,
 } from './types'
@@ -28,7 +29,15 @@ import Jadlospis from './components/Jadlospis'
 export default function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('list')
   const [editingMealPlan, setEditingMealPlan] = useState<MealPlan | null>(null)
+  const [listView, setListView] = useState<ShoppingListView>(() =>
+    localStorage.getItem('zakupowo-list-view') === 'days' ? 'days' : 'categories'
+  )
   const { isDark, toggleTheme } = useTheme()
+
+  function handleListViewChange(view: ShoppingListView) {
+    setListView(view)
+    localStorage.setItem('zakupowo-list-view', view)
+  }
 
   const {
     items,
@@ -167,8 +176,12 @@ export default function App() {
             items={items}
             loading={loading}
             error={error}
+            view={listView}
+            onViewChange={handleListViewChange}
+            mealPlans={activeMealPlans}
             onToggle={handleToggle}
             onRemove={handleRemoveItem}
+            onEditMealPlan={setEditingMealPlan}
           />
         </>
       )}

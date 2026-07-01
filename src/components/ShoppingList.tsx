@@ -1,22 +1,32 @@
-import type { ShoppingItem } from '../types'
+import type { MealPlan, ShoppingItem, ShoppingListView } from '../types'
 import { AlertTriangle, ShoppingCart } from 'lucide-react'
 import CategoryListView from './CategoryListView'
+import DayListView from './DayListView'
+import ListViewToggle from './ListViewToggle'
 import ProductItem from './ProductItem'
 
 interface ShoppingListProps {
   items: ShoppingItem[]
   loading: boolean
   error: string | null
+  view: ShoppingListView
+  onViewChange: (view: ShoppingListView) => void
+  mealPlans: MealPlan[]
   onToggle: (id: string, checked: boolean) => void
   onRemove: (item: ShoppingItem) => void
+  onEditMealPlan: (plan: MealPlan) => void
 }
 
 export default function ShoppingList({
   items,
   loading,
   error,
+  view,
+  onViewChange,
+  mealPlans,
   onToggle,
   onRemove,
+  onEditMealPlan,
 }: ShoppingListProps) {
   if (loading) {
     return (
@@ -55,7 +65,20 @@ export default function ShoppingList({
           <p className="mt-1 text-sm">Dodaj pierwszy produkt powyżej</p>
         </div>
       ) : (
-        <CategoryListView items={unchecked} onToggle={onToggle} onRemove={onRemove} />
+        <>
+          <ListViewToggle value={view} onChange={onViewChange} />
+          {view === 'categories' ? (
+            <CategoryListView items={unchecked} onToggle={onToggle} onRemove={onRemove} />
+          ) : (
+            <DayListView
+              items={unchecked}
+              mealPlans={mealPlans}
+              onToggle={onToggle}
+              onRemove={onRemove}
+              onEditMealPlan={onEditMealPlan}
+            />
+          )}
+        </>
       )}
 
       {checked.length > 0 && (

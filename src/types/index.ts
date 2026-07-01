@@ -107,3 +107,5 @@ export interface HistoryEntry {
 }
 
 export type ActiveTab = 'list' | 'templates' | 'historia' | 'statystyki' | 'jadlospis'
+
+export type ShoppingListView = 'categories' | 'days'
